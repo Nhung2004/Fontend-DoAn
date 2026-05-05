@@ -154,7 +154,6 @@ class ApiService {
         params: { doctorId, workDate: date }
       });
 
-      // Your backend returns { data: [], pagination: ... }
       const schedules = Array.isArray(schedulesRes.data.data)
         ? schedulesRes.data.data
         : (Array.isArray(schedulesRes.data) ? schedulesRes.data : []);
@@ -164,18 +163,15 @@ class ApiService {
         return { data: [] };
       }
 
-      // 2. Get time slots for the first found schedule using the alternative endpoint
       const scheduleId = schedules[0].id;
       const slotsRes = await this.client.get('/api/time-slots', {
         params: { scheduleId }
       });
 
-      // Handle slots which might also be nested in .data.data or .data
       const slots = Array.isArray(slotsRes.data.data)
         ? slotsRes.data.data
         : (Array.isArray(slotsRes.data) ? slotsRes.data : []);
 
-      // Map the response to the format expected by the UI
       return {
         data: slots.map((slot: any) => ({
           id: slot.id,
@@ -199,8 +195,6 @@ class ApiService {
 
   // Appointment endpoints
   async bookAppointment(data: any) {
-    console.log('Sending booking request with data:', data);
-    // Ensure time is in HH:mm:ss format
     const formattedTime = data.appointmentTime?.length === 5
       ? `${data.appointmentTime}:00`
       : data.appointmentTime;
@@ -221,7 +215,6 @@ class ApiService {
   }
 
   async getAllAppointments(page = 1, limit = 10, status = '') {
-    // Try admin endpoint first if it exists, fallback to regular
     try {
       return (await this.client.get('/api/admin/appointments', {
         params: { page, limit, status }
@@ -235,25 +228,74 @@ class ApiService {
 
   async getAllUsers(page = 1, limit = 20) {
     return (await this.client.get('/api/admin/users', {
-      params: { page: page - 1, size: limit }
+      params: { page: page - 1, limit }
     })).data;
   }
 
   async getAllDoctors(page = 1, limit = 20) {
-    // Try admin endpoint first, then public
     try {
       return (await this.client.get('/api/admin/doctors', {
-        params: { page: page - 1, size: limit }
+        params: { page: page - 1, limit }
       })).data;
     } catch (e) {
       return (await this.client.get('/api/doctors', {
-        params: { page: page - 1, size: limit }
+        params: { page: page - 1, limit }
       })).data;
     }
   }
 
   async updateDoctorStatus(id: string, isActive: boolean) {
-    return (await this.client.put(`/api/admin/doctors/${id}/status`, { isActive })).data;
+    try {
+      return (await this.client.put(`/api/admin/doctors/${id}/status`, { isActive })).data;
+    } catch (error) {
+      return (await this.client.put(`/api/admin/doctors/${id}`, { active: isActive })).data;
+    }
+  }
+
+  async updateDoctor(id: string, data: any) {
+    try {
+      const mappedData = {
+        fullName: data.fullName,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        bio: data.bio,
+        avatar: data.avatar,
+        experience: data.yearsOfExperience || data.experience,
+        license: data.license,
+        price: data.consultationFee || data.price,
+        rating: data.rating,
+        reviewCount: data.reviewCount,
+        specialtyId: data.specialtyId,
+        hospitalId: data.hospitalId,
+        active: data.active !== undefined ? data.active : true
+      };
+      return (await this.client.put(`/api/admin/doctors/${id}`, mappedData)).data;
+    } catch (error: any) {
+      return (await this.client.put(`/api/admin/doctors/${id}`, data)).data;
+    }
+  }
+
+  async createDoctor(data: any) {
+    const mappedData = {
+      fullName: data.fullName,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      bio: data.bio,
+      avatar: data.avatar,
+      experience: data.yearsOfExperience || data.experience,
+      license: data.license,
+      price: data.consultationFee || data.price,
+      rating: data.rating,
+      reviewCount: data.reviewCount,
+      specialtyId: data.specialtyId,
+      hospitalId: data.hospitalId,
+      active: data.active !== undefined ? data.active : true
+    };
+    return (await this.client.post('/api/admin/doctors', mappedData)).data;
+  }
+
+  async deleteDoctor(id: string) {
+    return (await this.client.delete(`/api/admin/doctors/${id}`)).data;
   }
 
   async getAppointmentById(id: string) {
@@ -261,142 +303,143 @@ class ApiService {
   }
 
   async updateAppointmentStatus(id: string, status: string) {
-    console.log(`Updating appointment ${id} to status: ${status}`);
     try {
-      // Try simple status update first
       return (await this.client.put(`/api/admin/appointments/${id}`, { status })).data;
     } catch (error: any) {
-      console.warn('Partial status update failed, trying full object update...', error.message);
       try {
-        // Fallback: get full object and update it
         const appointments = await this.getAllAppointments(1, 1000);
         const apps = Array.isArray(appointments) ? appointments : (appointments.data || appointments.content || []);
         const appointment = apps.find((a: any) => String(a.id) === String(id));
-        
         if (appointment) {
-          const updatedApt = { ...appointment, status };
-          return (await this.client.put(`/api/admin/appointments/${id}`, updatedApt)).data;
+          return (await this.client.put(`/api/admin/appointments/${id}`, { ...appointment, status })).data;
         }
         throw error;
       } catch (innerError) {
-        console.error('Full status update also failed:', innerError);
         throw innerError;
       }
     }
   }
 
   async getAdminDashboard() {
-    console.log('--- [ADMIN DASHBOARD DEBUG START] ---');
     try {
-      console.log('Attempting specialized dashboard endpoint: /api/admin/dashboard');
       const res = await this.client.get('/api/admin/dashboard');
-      console.log('SUCCESS: /api/admin/dashboard returned:', res.data);
-      
-      // Flatten the response if it has a statistics wrapper
-      let data = res.data?.statistics || res.data;
-      
-      // Map the backend structure to the UI structure
-      const finalData = {
-        totalDoctors: data.totalDoctors || 0,
-        totalAppointments: data.totalAppointments || 0,
-        totalUsers: data.totalUsers || 0,
-        totalRevenue: data.totalRevenue || 0,
+      const statsObj = res.data?.statistics || res.data;
+      if (!statsObj || !statsObj.trends) {
+        return await this.calculateManualDashboardStats(statsObj || {});
+      }
+      return {
+        totalDoctors: statsObj.totalDoctors || 0,
+        totalAppointments: statsObj.totalAppointments || 0,
+        totalUsers: statsObj.totalUsers || 0,
+        totalRevenue: statsObj.totalRevenue || 0,
+        monthlyRevenue: statsObj.monthlyRevenue || 0,
+        monthlyAppointments: statsObj.monthlyAppointments || 0,
+        trends: statsObj.trends || { users: '+0%', usersUp: true, appointments: '+0%', appointmentsUp: true, revenue: '+0%', revenueUp: true, doctors: '+0%', doctorsUp: true },
         appointmentStats: {
-          pending: data.appointmentStatuses?.PENDING || 0,
-          scheduled: data.appointmentStatuses?.CONFIRMED || data.appointmentStatuses?.SCHEDULED || 0,
-          completed: data.appointmentStatuses?.COMPLETED || 0,
-          cancelled: data.appointmentStatuses?.CANCELLED || 0
+          pending: statsObj.appointmentStatuses?.PENDING || 0,
+          scheduled: statsObj.appointmentStatuses?.CONFIRMED || statsObj.appointmentStatuses?.SCHEDULED || 0,
+          completed: statsObj.appointmentStatuses?.COMPLETED || 0,
+          cancelled: statsObj.appointmentStatuses?.CANCELLED || 0
         },
-        revenueStats: data.revenueStats || [
-          { month: 'Feb', revenue: (data.totalRevenue || 0) * 0.6 },
-          { month: 'Mar', revenue: (data.totalRevenue || 0) * 0.8 },
-          { month: 'Apr', revenue: data.totalRevenue || 0 }
-        ],
-        dailyStats: data.dailyStats || [
-          { name: 'Mon', appointments: Math.round((data.totalAppointments || 11) * 0.1), previous: 2 },
-          { name: 'Tue', appointments: Math.round((data.totalAppointments || 11) * 0.15), previous: 3 },
-          { name: 'Wed', appointments: Math.round((data.totalAppointments || 11) * 0.2), previous: 2 },
-          { name: 'Thu', appointments: Math.round((data.totalAppointments || 11) * 0.1), previous: 4 },
-          { name: 'Fri', appointments: Math.round((data.totalAppointments || 11) * 0.25), previous: 3 },
-          { name: 'Sat', appointments: Math.round((data.totalAppointments || 11) * 0.1), previous: 5 },
-          { name: 'Sun', appointments: Math.round((data.totalAppointments || 11) * 0.1), previous: 2 },
-        ]
+        revenueStats: statsObj.revenueStats || [],
+        dailyStats: statsObj.dailyStats || []
+      };
+    } catch (error: any) {
+      return await this.calculateManualDashboardStats();
+    }
+  }
+
+  private async calculateManualDashboardStats(existingStats: any = {}) {
+    try {
+      const [doctorsRes, appointmentsRes, usersRes] = await Promise.all([
+        this.client.get('/api/admin/doctors?limit=100').catch(() => this.client.get('/api/doctors?limit=100')).catch(() => ({ data: [] })),
+        this.client.get('/api/admin/appointments?limit=100').catch(() => this.client.get('/api/appointments?limit=100')).catch(() => ({ data: [] })),
+        this.client.get('/api/admin/users?limit=100').catch(() => this.client.get('/api/users?limit=100')).catch(() => ({ data: [] }))
+      ]);
+
+      const extract = (res: any) => {
+        const body = res.data || res;
+        if (Array.isArray(body)) return body;
+        if (Array.isArray(body.content)) return body.content;
+        if (Array.isArray(body.data)) return body.data;
+        if (Array.isArray(body.data?.content)) return body.data.content;
+        return [];
       };
 
-      console.log('Final Normalized Dashboard Data:', finalData);
-      return finalData;
-    } catch (error: any) {
-      console.warn('Specialized dashboard failed, falling back to aggregation. Error:', error.message);
-      if (error.response) {
-        console.warn('Response Status:', error.response.status);
-        console.warn('Response Data:', error.response.data);
+      const doctors = extract(doctorsRes);
+      const appointments = extract(appointmentsRes);
+      const users = extract(usersRes);
+
+      const calcTotalRevenue = (list: any[]) => list
+        .filter((a: any) => (a.status || '').toUpperCase() === 'COMPLETED' || (a.status || '').toUpperCase() === 'SUCCESS')
+        .reduce((sum: number, a: any) => sum + (Number(a.price) || Number(a.doctorPrice) || 50), 0);
+
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dailyStats = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const count = appointments.filter((a: any) => (a.appointmentDate || a.createdAt || '').includes(dateStr)).length;
+        dailyStats.push({ name: days[d.getDay()], appointments: count, fullDate: dateStr });
       }
-      
-      try {
-        console.log('Fetching aggregated data from multiple endpoints...');
-        const [doctorsRes, appointmentsRes, usersRes] = await Promise.all([
-          this.client.get('/api/admin/doctors?size=2000')
-            .catch((e) => { console.warn('ADMIN Doctors failed, trying public:', e.message); return this.client.get('/api/doctors?size=2000'); })
-            .catch(e => { console.error('ALL Doctors endpoints failed:', e.message); return { data: [], isError: true }; }),
-          
-          this.client.get('/api/admin/appointments?size=2000')
-            .catch((e) => { console.warn('ADMIN Appointments failed, trying public:', e.message); return this.client.get('/api/appointments?size=2000'); })
-            .catch(e => { console.error('ALL Appointments endpoints failed:', e.message); return { data: [], isError: true }; }),
-          
-          this.client.get('/api/admin/users?size=2000')
-            .catch((e) => { console.warn('ADMIN Users failed, trying public:', e.message); return this.client.get('/api/users?size=2000'); })
-            .catch(e => { console.error('ALL Users endpoints failed:', e.message); return { data: [], isError: true }; })
-        ]);
 
-        console.log('--- RAW DATA FROM BACKEND ---');
-        console.log('Doctors raw:', doctorsRes.data);
-        console.log('Appointments raw:', appointmentsRes.data);
-        console.log('Users raw:', usersRes.data);
+      const now = new Date();
+      const curMonth = now.getMonth();
+      const curYear = now.getFullYear();
+      const prevMonth = curMonth === 0 ? 11 : curMonth - 1;
+      const prevYear = curMonth === 0 ? curYear - 1 : curYear;
 
-        const extractArray = (resBody: any, label: string) => {
-          let arr = [];
-          if (!resBody) arr = [];
-          else if (Array.isArray(resBody)) arr = resBody;
-          else if (Array.isArray(resBody.content)) arr = resBody.content;
-          else if (Array.isArray(resBody.data)) arr = resBody.data;
-          else if (Array.isArray(resBody.data?.content)) arr = resBody.data.content;
-          
-          console.log(`Extracted ${label}: ${arr.length} items`);
-          return arr;
-        };
+      const isMatch = (dStr: string, m: number, y: number) => {
+        if (!dStr) return false;
+        const d = new Date(dStr);
+        return d.getMonth() === m && d.getFullYear() === y;
+      };
 
-        const doctors = extractArray(doctorsRes.data, 'Doctors');
-        const appointments = extractArray(appointmentsRes.data, 'Appointments');
-        const users = extractArray(usersRes.data, 'Users');
+      const calcTrend = (list: any[], dateField: string) => {
+        const cur = list.filter(item => isMatch(item[dateField] || item.createdAt, curMonth, curYear)).length;
+        const prev = list.filter(item => isMatch(item[dateField] || item.createdAt, prevMonth, prevYear)).length;
+        if (prev === 0) return cur > 0 ? '+100%' : '+0%';
+        const pct = Math.round(((cur - prev) / prev) * 100);
+        return pct >= 0 ? `+${pct}%` : `${pct}%`;
+      };
 
-        const pending = appointments.filter((a: any) => (a.status || '').toUpperCase() === 'PENDING').length;
-        const scheduled = appointments.filter((a: any) => (a.status || '').toUpperCase() === 'SCHEDULED').length;
-        const completed = appointments.filter((a: any) => (a.status || '').toUpperCase() === 'COMPLETED').length;
-        const cancelled = appointments.filter((a: any) => (a.status || '').toUpperCase() === 'CANCELLED').length;
+      const getRevenueForMonth = (m: number, y: number) => appointments
+        .filter(a => ((a.status || '').toUpperCase() === 'COMPLETED' || (a.status || '').toUpperCase() === 'SUCCESS') && isMatch(a.appointmentDate || a.createdAt, m, y))
+        .reduce((sum, a) => sum + (Number(a.price) || Number(a.doctorPrice) || 50), 0);
 
-        const totalRevenue = completed * 50; 
+      const curRevVal = getRevenueForMonth(curMonth, curYear);
+      const prevRevVal = getRevenueForMonth(prevMonth, prevYear);
+      const revenueTrendPct = prevRevVal === 0 ? (curRevVal > 0 ? '+100%' : '+0%') : `${Math.round(((curRevVal - prevRevVal) / prevRevVal) * 100)}%`;
 
-        const finalStats = {
-          totalDoctors: doctors.length,
-          totalAppointments: appointments.length,
-          totalUsers: users.length || (doctors.length + 5), 
-          totalRevenue: totalRevenue,
-          appointmentStats: { pending, scheduled, completed, cancelled },
-          revenueStats: [
-            { month: 'Jan', revenue: totalRevenue * 0.4 },
-            { month: 'Feb', revenue: totalRevenue * 0.6 },
-            { month: 'Mar', revenue: totalRevenue * 0.8 },
-            { month: 'Apr', revenue: totalRevenue }
-          ]
-        };
-        
-        console.log('Final Calculated Stats:', finalStats);
-        console.log('--- [ADMIN DASHBOARD DEBUG END] ---');
-        return finalStats;
-      } catch (innerError: any) {
-        console.error('Aggregation CRITICAL ERROR:', innerError.message);
-        return { totalDoctors: 0, totalAppointments: 0, totalUsers: 0, totalRevenue: 0 };
-      }
+      return {
+        totalDoctors: existingStats.totalDoctors || doctors.length,
+        totalAppointments: existingStats.totalAppointments || appointments.length,
+        totalUsers: existingStats.totalUsers || users.length,
+        totalRevenue: calcTotalRevenue(appointments),
+        monthlyRevenue: curRevVal,
+        monthlyAppointments: appointments.filter((a: any) => isMatch(a.appointmentDate || a.createdAt, curMonth, curYear)).length,
+        trends: {
+          users: calcTrend(users, 'createdAt'),
+          usersUp: !calcTrend(users, 'createdAt').startsWith('-'),
+          appointments: calcTrend(appointments, 'appointmentDate'),
+          appointmentsUp: !calcTrend(appointments, 'appointmentDate').startsWith('-'),
+          revenue: revenueTrendPct.startsWith('-') ? revenueTrendPct : `+${revenueTrendPct}`,
+          revenueUp: !revenueTrendPct.startsWith('-'),
+          doctors: calcTrend(doctors, 'createdAt'),
+          doctorsUp: !calcTrend(doctors, 'createdAt').startsWith('-')
+        },
+        appointmentStats: {
+          pending: appointments.filter((a: any) => (a.status || '').toUpperCase() === 'PENDING').length,
+          scheduled: appointments.filter((a: any) => (a.status || '').toUpperCase() === 'CONFIRMED' || (a.status || '').toUpperCase() === 'SCHEDULED').length,
+          completed: appointments.filter((a: any) => (a.status || '').toUpperCase() === 'COMPLETED').length,
+          cancelled: appointments.filter((a: any) => (a.status || '').toUpperCase() === 'CANCELLED').length
+        },
+        revenueStats: [{ month: 'Last Month', revenue: prevRevVal }, { month: 'This Month', revenue: curRevVal }],
+        dailyStats
+      };
+    } catch (e: any) {
+      return { totalDoctors: 0, totalAppointments: 0, totalUsers: 0, totalRevenue: 0 };
     }
   }
 }
