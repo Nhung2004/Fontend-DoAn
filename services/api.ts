@@ -257,9 +257,13 @@ class ApiService {
     // Ensure we don't send synthesized fields back to the API
     const { fullName, ...payload } = data;
     
-    // Some backends use 'phone', some use 'phoneNumber'. Send both to be safe.
-    if (payload.phoneNumber) payload.phone = payload.phoneNumber;
-    if (payload.phone && !payload.phoneNumber) payload.phoneNumber = payload.phone;
+    // Send all possible phone field names to be safe with different backend versions
+    const phoneValue = payload.phoneNumber || payload.phone || payload.mobile;
+    if (phoneValue) {
+      payload.phoneNumber = phoneValue;
+      payload.phone = phoneValue;
+      payload.mobile = phoneValue;
+    }
 
     // Use login in URL if available for better REST compliance
     const url = payload.login ? `/api/admin/users/${payload.login}` : '/api/admin/users';

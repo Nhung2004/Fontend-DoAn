@@ -139,11 +139,18 @@ export default function AdminUsersPage() {
       });
       
       // Update local state immediately for instant feedback
-      setUsers(prev => prev.map(u => 
-        (u.id && u.id === selectedUser.id) || (u.login && u.login === selectedUser.login) 
-          ? { ...u, ...updatedUser } 
-          : u
-      ));
+      setUsers(prev => prev.map(u => {
+        const isMatch = (u.id && u.id === selectedUser.id) || (u.login && u.login === selectedUser.login);
+        if (isMatch) {
+          return { 
+            ...u, 
+            ...updatedUser, 
+            phoneNumber: updateData.phoneNumber, // Force frontend value to stay
+            fullName: selectedUser.fullName 
+          };
+        }
+        return u;
+      }));
       
       setIsModalOpen(false);
       await fetchUsers(); // Refresh list from server to be sure
@@ -266,7 +273,7 @@ export default function AdminUsersPage() {
                             </div>
                             <div className="flex items-center gap-1">
                               <Phone size={16} />
-                              {u.phoneNumber || 'No phone'}
+                              {u.phoneNumber || u.phone || u.mobile || 'No phone'}
                             </div>
                           </div>
                           <p className="text-sm text-gray-500 mt-2">
