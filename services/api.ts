@@ -297,49 +297,54 @@ class ApiService {
     }
   }
 
-  async updateDoctor(id: string, data: any) {
-    try {
-      const mappedData = {
-        fullName: data.fullName,
-        email: data.email,
-        phoneNumber: data.phoneNumber,
-        bio: data.bio,
-        avatar: data.avatar,
-        experience: data.yearsOfExperience || data.experience,
-        license: data.license,
-        price: data.consultationFee || data.price,
-        rating: data.rating,
-        reviewCount: data.reviewCount,
-        specialtyId: data.specialtyId,
-        hospitalId: data.hospitalId,
-        active: data.active !== undefined ? data.active : true
-      };
-      return (await this.client.put(`/api/admin/doctors/${id}`, mappedData)).data;
-    } catch (error: any) {
-      return (await this.client.put(`/api/admin/doctors/${id}`, data)).data;
+  async updateDoctor(id: string | number, data: any) {
+    const payload: any = {
+      fullName: (data.fullName || '').trim(),
+      email: data.email || '',
+      phoneNumber: data.phoneNumber || '',
+      bio: data.bio || '',
+      avatar: data.avatar || '',
+      experience: Number(data.yearsOfExperience || data.experience || 0),
+      license: data.license || '',
+      price: Number(data.consultationFee || data.price || 0),
+      rating: Number(data.rating || 0),
+      reviewCount: Number(data.reviewCount || 0),
+      specialtyId: data.specialtyId ? Number(data.specialtyId) : null,
+      hospitalId: data.hospitalId ? Number(data.hospitalId) : null
+    };
+
+    // Ensure fullName is not empty to avoid @NotBlank 400 error
+    if (!payload.fullName) {
+      throw new Error('Full name is required');
     }
+
+    console.log('Final Payload to Backend (Exact Spec):', payload);
+
+    const res = await this.client.put(`/api/admin/doctors/${id}`, payload);
+    return res.data;
   }
 
   async createDoctor(data: any) {
-    const mappedData = {
+    const payload = {
       fullName: data.fullName,
       email: data.email,
       phoneNumber: data.phoneNumber,
       bio: data.bio,
       avatar: data.avatar,
-      experience: data.yearsOfExperience || data.experience,
+      experience: Number(data.yearsOfExperience || data.experience || 0),
       license: data.license,
-      price: data.consultationFee || data.price,
-      rating: data.rating,
-      reviewCount: data.reviewCount,
-      specialtyId: data.specialtyId,
-      hospitalId: data.hospitalId,
-      active: data.active !== undefined ? data.active : true
+      price: Number(data.consultationFee || data.price || 0),
+      rating: Number(data.rating || 0),
+      reviewCount: Number(data.reviewCount || 0),
+      specialtyId: Number(data.specialtyId),
+      hospitalId: Number(data.hospitalId)
     };
-    return (await this.client.post('/api/admin/doctors', mappedData)).data;
+
+    const res = await this.client.post('/api/admin/doctors', payload);
+    return res.data;
   }
 
-  async deleteDoctor(id: string) {
+  async deleteDoctor(id: string | number) {
     return (await this.client.delete(`/api/admin/doctors/${id}`)).data;
   }
 

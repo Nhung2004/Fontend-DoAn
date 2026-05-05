@@ -19,6 +19,16 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AlertCircle } from 'lucide-react';
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -35,6 +45,10 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Error Alert State
+  const [isErrorAlertOpen, setIsErrorAlertOpen] = useState(false);
+  const [errorAlertMessage, setErrorAlertMessage] = useState('');
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -147,7 +161,6 @@ export default function AdminUsersPage() {
 
   const handleDelete = async (u: any) => {
     const identifier = u.id || u.login || u.email;
-    if (!confirm(`Are you sure you want to delete user ${u.fullName || identifier}?`)) return;
     try {
       await apiService.deleteUser(identifier);
       toast({
@@ -157,12 +170,14 @@ export default function AdminUsersPage() {
       fetchUsers();
     } catch (error: any) {
       console.error('Failed to delete user:', error);
-      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Failed to delete user. The user might have associated records (appointments, etc.) that prevent deletion.';
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      
+      // Hiển thị dialog thông báo lỗi đẹp mắt
+      if (error.response?.status === 500 || error.response?.status === 400) {
+        setErrorAlertMessage('Người dùng này đang có lịch hẹn hoặc dữ liệu liên quan, không thể xóa trực tiếp!');
+      } else {
+        setErrorAlertMessage('Đã có lỗi xảy ra trong quá trình xóa người dùng. Vui lòng thử lại sau.');
+      }
+      setIsErrorAlertOpen(true);
     }
   };
 
@@ -380,6 +395,28 @@ export default function AdminUsersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Beautiful Error Alert Dialog */}
+      <AlertDialog open={isErrorAlertOpen} onOpenChange={setIsErrorAlertOpen}>
+        <AlertDialogContent className="max-w-[400px] border-red-100 shadow-xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 text-red-600 mb-2">
+              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                <AlertCircle size={24} />
+              </div>
+              <AlertDialogTitle className="text-xl">Không thể xóa</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-gray-600 py-2 text-base">
+              {errorAlertMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700 text-white font-semibold">
+              Đã hiểu
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

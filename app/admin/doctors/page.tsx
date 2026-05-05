@@ -7,16 +7,53 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Star, Edit, Eye, UserCheck, UserX, Save, X } from 'lucide-react';
 import { apiService } from '@/services/api';
+import { useToast } from '@/components/ui/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function AdminDoctorsPage() {
   const router = useRouter();
   const { user, isAuthenticated, isInitialized } = useAuthStore();
+  const { toast } = useToast();
   const [doctors, setDoctors] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+  const [specialties, setSpecialties] = useState<any[]>([]);
+  const [hospitals, setHospitals] = useState<any[]>([]);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const mapDoctorData = (d: any) => ({
+    ...d,
+    specialtyId: d.specialtyId || (typeof d.specialty === 'object' ? d.specialty?.id : undefined),
+    hospitalId: d.hospitalId || (typeof d.hospital === 'object' ? d.hospital?.id : undefined),
+    specialization: d.specialization || (typeof d.specialty === 'object' ? d.specialty?.name : d.specialty) || d.specialtyName || 'N/A',
+    yearsOfExperience: d.yearsOfExperience || d.experience || 0,
+    consultationFee: d.consultationFee || d.price || 0,
+    isAvailable: d.active !== undefined ? d.active : (d.isAvailable !== undefined ? d.isAvailable : true),
+    qualification: d.qualification || d.degree || 'N/A'
+  });
 
   useEffect(() => {
     if (!isInitialized) return;
@@ -25,24 +62,31 @@ export default function AdminDoctorsPage() {
       return;
     }
 
-    const fetchDoctors = async () => {
+    const fetchInitialData = async () => {
       try {
-        const response = await apiService.getAllDoctors(page, 10);
+        const [docsRes, specsRes, hospsRes] = await Promise.all([
+          apiService.getAllDoctors(page, 10),
+          apiService.getSpecialties(),
+          apiService.getHospitals()
+        ]);
+
         let docsList = [];
-        if (Array.isArray(response)) docsList = response;
-        else if (Array.isArray(response?.data)) docsList = response.data;
-        else if (response?.data?.doctors) docsList = response.data.doctors;
-        else if (response?.doctors) docsList = response.doctors;
+        if (Array.isArray(docsRes)) docsList = docsRes;
+        else if (Array.isArray(docsRes?.data)) docsList = docsRes.data;
+        else if (docsRes?.data?.doctors) docsList = docsRes.data.doctors;
+        else if (docsRes?.doctors) docsList = docsRes.doctors;
         
-        setDoctors(docsList);
+        setDoctors(docsList.map(mapDoctorData));
+        setSpecialties(Array.isArray(specsRes.data) ? specsRes.data : specsRes);
+        setHospitals(Array.isArray(hospsRes.data) ? hospsRes.data : hospsRes);
       } catch (error) {
-        console.error('Failed to fetch doctors:', error);
+        console.error('Failed to fetch initial data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchDoctors();
+    fetchInitialData();
   }, [isAuthenticated, user?.role, router, page]);
 
   const handleStatusUpdate = async (doctorId: string, isActive: boolean) => {
@@ -53,15 +97,88 @@ export default function AdminDoctorsPage() {
           d.id === doctorId ? { ...d, isAvailable: !isActive } : d
         )
       );
+      toast({
+        title: 'Status Updated',
+        description: `Doctor is now ${!isActive ? 'Active' : 'Inactive'}.`,
+      });
     } catch (error) {
       console.error('Failed to update doctor status:', error);
+      toast({
+        title: 'Update Failed',
+        description: 'Failed to update doctor status.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleEdit = async (doctor: any) => {
+    try {
+      // Fetch full doctor details to get specialtyId, hospitalId, etc.
+      const fullDoctor = await apiService.getDoctorById(doctor.id);
+      setSelectedDoctor(mapDoctorData(fullDoctor));
+    } catch (error) {
+      console.warn('Failed to fetch full doctor details, using list data:', error);
+      setSelectedDoctor({ ...doctor });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!selectedDoctor) return;
+    setIsSaving(true);
+    try {
+      const response = await apiService.updateDoctor(selectedDoctor.id, selectedDoctor);
+      const updatedDoc = response.doctor || selectedDoctor;
+      
+      setDoctors(
+        doctors.map((d) =>
+          d.id === selectedDoctor.id ? mapDoctorData(updatedDoc) : d
+        )
+      );
+      toast({
+        title: 'Success',
+        description: response.message || 'Doctor profile updated successfully.',
+      });
+      setIsModalOpen(false);
+    } catch (error: any) {
+      console.error('Failed to update doctor:', error);
+      const message = error.response?.data?.message || 'Failed to update doctor information.';
+      toast({
+        title: 'Update Failed',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (doctor: any) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa bác sĩ ${doctor.fullName}?`)) return;
+    try {
+      await apiService.deleteDoctor(doctor.id);
+      setDoctors(doctors.filter((d) => d.id !== doctor.id));
+      toast({
+        title: 'Bác sĩ đã được xóa',
+        description: 'Thông tin bác sĩ đã được gỡ bỏ khỏi hệ thống.',
+      });
+    } catch (error: any) {
+      console.error('Failed to delete doctor:', error);
+      const message = error.response?.status === 409 
+        ? (error.response?.data?.message || 'Không thể xóa bác sĩ này vì đang có dữ liệu liên quan (lịch hẹn, hồ sơ...).')
+        : 'Đã có lỗi xảy ra khi xóa bác sĩ.';
+      toast({
+        title: 'Lỗi khi xóa',
+        description: message,
+        variant: 'destructive',
+      });
     }
   };
 
   const filteredDoctors = doctors.filter(
     (d) =>
-      d.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.specialization.toLowerCase().includes(searchTerm.toLowerCase())
+      (d.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (d.specialization || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const role = user?.role?.toUpperCase();
@@ -170,22 +287,35 @@ export default function AdminDoctorsPage() {
                       </div>
 
                       <div className="flex flex-col gap-2">
-                        <Button size="sm" variant="outline">
-                          View Profile
+                        <Button size="sm" variant="outline" onClick={() => router.push(`/doctors/${doctor.id}`)}>
+                          <Eye size={16} className="mr-1" /> View Profile
                         </Button>
-                        <Button size="sm" variant="outline">
-                          Edit
+                        <Button size="sm" variant="outline" onClick={() => handleEdit(doctor)}>
+                          <Edit size={16} className="mr-1" /> Edit
                         </Button>
                         <Button
                           size="sm"
                           variant={
                             doctor.isAvailable ? 'destructive' : 'default'
                           }
+                          className={doctor.isAvailable ? 'bg-red-50 text-red-600 hover:bg-red-100 border-red-200' : 'bg-green-600 hover:bg-green-700 text-white'}
                           onClick={() =>
                             handleStatusUpdate(doctor.id, doctor.isAvailable)
                           }
                         >
-                          {doctor.isAvailable ? 'Deactivate' : 'Activate'}
+                          {doctor.isAvailable ? (
+                            <><UserX size={16} className="mr-1" /> Deactivate</>
+                          ) : (
+                            <><UserCheck size={16} className="mr-1" /> Activate</>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                          onClick={() => handleDelete(doctor)}
+                        >
+                          <X size={16} className="mr-1" /> Delete
                         </Button>
                       </div>
                     </div>
@@ -216,6 +346,112 @@ export default function AdminDoctorsPage() {
           )}
         </div>
       </main>
+
+      {/* Edit Doctor Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Doctor Profile</DialogTitle>
+            <DialogDescription>
+              Update information for Dr. {selectedDoctor?.fullName}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedDoctor && (
+            <div className="grid gap-6 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Full Name</Label>
+                <Input
+                  id="name"
+                  value={selectedDoctor.fullName || ''}
+                  onChange={(e) => setSelectedDoctor({ ...selectedDoctor, fullName: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="specialty" className="text-right">Specialty</Label>
+                <div className="col-span-3">
+                  <Select 
+                    value={String(selectedDoctor.specialtyId || '')} 
+                    onValueChange={(val) => setSelectedDoctor({ ...selectedDoctor, specialtyId: val })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select specialty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specialties.map((s) => (
+                        <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="hospital" className="text-right">Hospital</Label>
+                <div className="col-span-3">
+                  <Select 
+                    value={String(selectedDoctor.hospitalId || '')} 
+                    onValueChange={(val) => setSelectedDoctor({ ...selectedDoctor, hospitalId: val })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select hospital" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hospitals.map((h) => (
+                        <SelectItem key={h.id} value={String(h.id)}>{h.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="experience" className="text-right">Experience (Years)</Label>
+                <Input
+                  id="experience"
+                  type="number"
+                  value={selectedDoctor.yearsOfExperience || 0}
+                  onChange={(e) => setSelectedDoctor({ ...selectedDoctor, yearsOfExperience: Number(e.target.value) })}
+                  className="col-span-3"
+                />
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="price" className="text-right">Consultation Fee ($)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  value={selectedDoctor.consultationFee || 0}
+                  onChange={(e) => setSelectedDoctor({ ...selectedDoctor, consultationFee: Number(e.target.value) })}
+                  className="col-span-3"
+                />
+              </div>
+
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="bio" className="text-right pt-2">Biography</Label>
+                <Textarea
+                  id="bio"
+                  value={selectedDoctor.bio || ''}
+                  onChange={(e) => setSelectedDoctor({ ...selectedDoctor, bio: e.target.value })}
+                  className="col-span-3 h-32"
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Changes'}
+              {!isSaving && <Save size={16} className="ml-2" />}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
