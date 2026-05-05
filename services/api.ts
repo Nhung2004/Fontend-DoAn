@@ -232,6 +232,18 @@ class ApiService {
     })).data;
   }
 
+  async getUserById(login: string) {
+    return (await this.client.get(`/api/admin/users/${login}`)).data;
+  }
+
+  async updateUser(data: any) {
+    return (await this.client.put('/api/admin/users', data)).data;
+  }
+
+  async deleteUser(login: string) {
+    return (await this.client.delete(`/api/admin/users/${login}`)).data;
+  }
+
   async getAllDoctors(page = 1, limit = 20) {
     try {
       return (await this.client.get('/api/admin/doctors', {

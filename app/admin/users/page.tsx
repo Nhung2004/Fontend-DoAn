@@ -7,17 +7,57 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Mail, Phone, User as UserIcon } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Mail, Phone, User as UserIcon, Shield, CheckCircle, Save, Trash2 } from 'lucide-react';
 import { apiService } from '@/services/api';
+import { useToast } from '@/components/ui/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 export default function AdminUsersPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const { user, isAuthenticated, isInitialized } = useAuthStore();
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [page, setPage] = useState(1);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const fetchUsers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await apiService.getAllUsers(page, 10);
+      let usersList = [];
+      if (Array.isArray(response)) usersList = response;
+      else if (Array.isArray(response?.data)) usersList = response.data;
+      else if (response?.data?.users) usersList = response.data.users;
+      else if (response?.users) usersList = response.users;
+      
+      setUsers(usersList);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load users list.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!isInitialized) return;
@@ -27,31 +67,82 @@ export default function AdminUsersPage() {
       return;
     }
 
-    const fetchUsers = async () => {
-      try {
-        const response = await apiService.getAllUsers(page, 10);
-        let usersList = [];
-        if (Array.isArray(response)) usersList = response;
-        else if (Array.isArray(response?.data)) usersList = response.data;
-        else if (response?.data?.users) usersList = response.data.users;
-        else if (response?.users) usersList = response.users;
-        
-        setUsers(usersList);
-      } catch (error) {
-        console.error('Failed to fetch users:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchUsers();
-  }, [isAuthenticated, user?.role, router, page]);
+  }, [isAuthenticated, user?.role, router, page, isInitialized]);
 
   const filteredUsers = users.filter(
     (u) =>
-      u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase())
+      (u.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.email || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleViewDetails = (u: any) => {
+    setSelectedUser(u);
+    setIsEditMode(false);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (u: any) => {
+    setSelectedUser({ ...u });
+    setIsEditMode(true);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!selectedUser) return;
+    setIsSaving(true);
+    try {
+      // Split fullName back to firstName and lastName for the API if needed
+      const nameParts = selectedUser.fullName.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ');
+
+      const updateData = {
+        ...selectedUser,
+        firstName,
+        lastName,
+        login: selectedUser.email, // JHipster usually uses email/login interchangeably
+      };
+
+      await apiService.updateUser(updateData);
+      
+      toast({
+        title: 'Success',
+        description: 'User information updated successfully.',
+      });
+      
+      setIsModalOpen(false);
+      fetchUsers(); // Refresh list
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update user information.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (email: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await apiService.deleteUser(email);
+      toast({
+        title: 'User Deleted',
+        description: 'The user account has been removed.',
+      });
+      fetchUsers();
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete user.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const role = user?.role?.toUpperCase();
   if (!isInitialized) {
@@ -71,11 +162,16 @@ export default function AdminUsersPage() {
       <main className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-12">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              User Management
-            </h1>
-            <p className="text-gray-600">Manage patient and staff accounts</p>
+          <div className="mb-8 flex justify-between items-end">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                User Management
+              </h1>
+              <p className="text-gray-600">Manage patient and staff accounts</p>
+            </div>
+            <Button onClick={() => fetchUsers()} variant="outline" size="sm">
+              Refresh List
+            </Button>
           </div>
 
           {/* Search */}
@@ -97,7 +193,10 @@ export default function AdminUsersPage() {
           {isLoading ? (
             <Card>
               <CardContent className="p-6">
-                <p className="text-gray-600">Loading users...</p>
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <p className="text-gray-600">Loading users...</p>
+                </div>
               </CardContent>
             </Card>
           ) : filteredUsers.length === 0 ? (
@@ -109,7 +208,7 @@ export default function AdminUsersPage() {
           ) : (
             <div className="space-y-4">
               {filteredUsers.map((u) => (
-                <Card key={u.id}>
+                <Card key={u.id || u.email} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4 flex-1">
@@ -117,7 +216,12 @@ export default function AdminUsersPage() {
                           <UserIcon size={24} className="text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-lg">{u.fullName}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-lg">{u.fullName}</h3>
+                            {u.authorities?.includes('ROLE_ADMIN') && (
+                              <Shield size={16} className="text-amber-500" title="Admin" />
+                            )}
+                          </div>
                           <div className="flex items-center gap-4 mt-2 text-gray-600 text-sm">
                             <div className="flex items-center gap-1">
                               <Mail size={16} />
@@ -125,21 +229,24 @@ export default function AdminUsersPage() {
                             </div>
                             <div className="flex items-center gap-1">
                               <Phone size={16} />
-                              {u.phoneNumber}
+                              {u.phoneNumber || 'No phone'}
                             </div>
                           </div>
                           <p className="text-sm text-gray-500 mt-2">
                             Joined:{' '}
-                            {new Date(u.createdAt).toLocaleDateString()}
+                            {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
                           </p>
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleViewDetails(u)}>
                           View Details
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleEdit(u)}>
                           Edit
+                        </Button>
+                        <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(u.email || u.login)}>
+                          <Trash2 size={16} />
                         </Button>
                       </div>
                     </div>
@@ -159,10 +266,11 @@ export default function AdminUsersPage() {
               >
                 Previous
               </Button>
-              <span className="text-gray-600">Page {page}</span>
+              <span className="text-gray-600 font-medium">Page {page}</span>
               <Button
                 variant="outline"
                 onClick={() => setPage(page + 1)}
+                disabled={users.length < 10}
               >
                 Next
               </Button>
@@ -170,6 +278,86 @@ export default function AdminUsersPage() {
           )}
         </div>
       </main>
+
+      {/* User Detail/Edit Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? 'Edit User' : 'User Details'}</DialogTitle>
+            <DialogDescription>
+              {isEditMode ? 'Update user information below.' : 'Detailed information about the user account.'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedUser && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Full Name</Label>
+                <Input
+                  id="name"
+                  value={selectedUser.fullName || ''}
+                  onChange={(e) => setSelectedUser({ ...selectedUser, fullName: e.target.value })}
+                  disabled={!isEditMode}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">Email</Label>
+                <Input
+                  id="email"
+                  value={selectedUser.email || ''}
+                  onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
+                  disabled={!isEditMode}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="phone" className="text-right">Phone</Label>
+                <Input
+                  id="phone"
+                  value={selectedUser.phoneNumber || ''}
+                  onChange={(e) => setSelectedUser({ ...selectedUser, phoneNumber: e.target.value })}
+                  disabled={!isEditMode}
+                  className="col-span-3"
+                />
+              </div>
+              {!isEditMode && (
+                <>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Status</Label>
+                    <div className="col-span-3 flex items-center gap-2">
+                      <CheckCircle size={16} className="text-green-500" />
+                      <span className="text-sm font-medium">Active Account</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Authorities</Label>
+                    <div className="col-span-3 flex flex-wrap gap-1">
+                      {selectedUser.authorities?.map((auth: string) => (
+                        <span key={auth} className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs font-bold border border-blue-100">
+                          {auth}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              {isEditMode ? 'Cancel' : 'Close'}
+            </Button>
+            {isEditMode && (
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Changes'}
+                {!isSaving && <Save size={16} className="ml-2" />}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
