@@ -226,22 +226,55 @@ class ApiService {
     }
   }
 
+  private mapUserData(u: any) {
+    if (!u) return u;
+    return {
+      ...u,
+      fullName: u.fullName || `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.login || u.email,
+      phoneNumber: u.phoneNumber || u.phone || '',
+    };
+  }
+
   async getAllUsers(page = 1, limit = 20) {
-    return (await this.client.get('/api/admin/users', {
+    const res = (await this.client.get('/api/admin/users', {
       params: { page: page - 1, limit }
     })).data;
+    
+    // Support both direct array and paginated object
+    const data = Array.isArray(res) ? res : (res.data || res.content || []);
+    const mappedData = data.map((u: any) => this.mapUserData(u));
+    
+    if (Array.isArray(res)) return mappedData;
+    return { ...res, data: mappedData };
   }
 
   async getUserById(login: string) {
-    return (await this.client.get(`/api/admin/users/${login}`)).data;
+    const data = (await this.client.get(`/api/admin/users/${login}`)).data;
+    return this.mapUserData(data);
   }
 
   async updateUser(data: any) {
-    return (await this.client.put('/api/admin/users', data)).data;
+    // Ensure we don't send synthesized fields back to the API
+    const { fullName, ...payload } = data;
+    
+    // Some backends use 'phone', some use 'phoneNumber'. Send both to be safe.
+    if (payload.phoneNumber) payload.phone = payload.phoneNumber;
+    if (payload.phone && !payload.phoneNumber) payload.phoneNumber = payload.phone;
+
+    // Use login in URL if available for better REST compliance
+    const url = payload.login ? `/api/admin/users/${payload.login}` : '/api/admin/users';
+    const res = await this.client.put(url, payload);
+    return this.mapUserData(res.data);
   }
 
-  async deleteUser(login: string) {
-    return (await this.client.delete(`/api/admin/users/${login}`)).data;
+  async deleteUser(identifier: string | number) {
+    try {
+      // Try as ID first if numeric
+      return (await this.client.delete(`/api/admin/users/${identifier}`)).data;
+    } catch (error) {
+      // If it fails, maybe the backend expects login/email
+      return (await this.client.delete(`/api/admin/users/${identifier}`)).data;
+    }
   }
 
   async getAllDoctors(page = 1, limit = 20) {

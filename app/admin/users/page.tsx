@@ -76,14 +76,27 @@ export default function AdminUsersPage() {
       (u.email || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleViewDetails = (u: any) => {
-    setSelectedUser(u);
-    setIsEditMode(false);
-    setIsModalOpen(true);
+  const handleViewDetails = async (u: any) => {
+    try {
+      const fullUser = await apiService.getUserById(u.login || u.email);
+      setSelectedUser(fullUser);
+      setIsEditMode(false);
+      setIsModalOpen(true);
+    } catch (error) {
+      setSelectedUser(u);
+      setIsEditMode(false);
+      setIsModalOpen(true);
+    }
   };
 
-  const handleEdit = (u: any) => {
-    setSelectedUser({ ...u });
+  const handleEdit = async (u: any) => {
+    try {
+      // Fetch full user details to get correct login and other fields
+      const fullUser = await apiService.getUserById(u.login || u.email);
+      setSelectedUser({ ...fullUser });
+    } catch (error) {
+      setSelectedUser({ ...u });
+    }
     setIsEditMode(true);
     setIsModalOpen(true);
   };
@@ -92,27 +105,34 @@ export default function AdminUsersPage() {
     if (!selectedUser) return;
     setIsSaving(true);
     try {
-      // Split fullName back to firstName and lastName for the API if needed
-      const nameParts = selectedUser.fullName.trim().split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.slice(1).join(' ');
+      const nameParts = (selectedUser.fullName || '').trim().split(' ');
+      const firstName = nameParts[0] || selectedUser.firstName || '';
+      const lastName = nameParts.slice(1).join(' ') || selectedUser.lastName || '';
 
       const updateData = {
         ...selectedUser,
         firstName,
         lastName,
-        login: selectedUser.email, // JHipster usually uses email/login interchangeably
+        // CRITICAL: Keep original login if present, don't just use email
+        login: selectedUser.login || selectedUser.email,
       };
 
-      await apiService.updateUser(updateData);
+      const updatedUser = await apiService.updateUser(updateData);
       
       toast({
         title: 'Success',
         description: 'User information updated successfully.',
       });
       
+      // Update local state immediately for instant feedback
+      setUsers(prev => prev.map(u => 
+        (u.id && u.id === selectedUser.id) || (u.login && u.login === selectedUser.login) 
+          ? { ...u, ...updatedUser } 
+          : u
+      ));
+      
       setIsModalOpen(false);
-      fetchUsers(); // Refresh list
+      await fetchUsers(); // Refresh list from server to be sure
     } catch (error) {
       console.error('Failed to update user:', error);
       toast({
@@ -125,20 +145,22 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleDelete = async (email: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+  const handleDelete = async (u: any) => {
+    const identifier = u.id || u.login || u.email;
+    if (!confirm(`Are you sure you want to delete user ${u.fullName || identifier}?`)) return;
     try {
-      await apiService.deleteUser(email);
+      await apiService.deleteUser(identifier);
       toast({
         title: 'User Deleted',
         description: 'The user account has been removed.',
       });
       fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete user:', error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Failed to delete user. The user might have associated records (appointments, etc.) that prevent deletion.';
       toast({
         title: 'Error',
-        description: 'Failed to delete user.',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -245,7 +267,7 @@ export default function AdminUsersPage() {
                         <Button size="sm" variant="outline" onClick={() => handleEdit(u)}>
                           Edit
                         </Button>
-                        <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(u.email || u.login)}>
+                        <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(u)}>
                           <Trash2 size={16} />
                         </Button>
                       </div>
