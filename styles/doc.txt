@@ -1,0 +1,9 @@
+Hình 3. 37: Màn hình cập nhật danh mục blog
+Cập nhật danh mục blog: Người dùng thực hiện nhấn vào nút “Sửa” tương
+ứng với danh mục blog cần sửa. Hệ thống sẽ hiển thị form cập nhật danh mục blog
+và load các thông tin của danh mục blog cần cập nhật. Người dùng thực hiện nhập
+thông tin và nhấn nút “Lưu” để lưu thông tin danh mục blog người dùng nhập.
+Người dùng nhấn nút “Hủy” để hủy việc cập nhật và hệ thống sẽ hiển thị màn hình
+danh sách các danh mục blog. 
+---
+// todo l
