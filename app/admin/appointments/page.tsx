@@ -7,7 +7,8 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, CheckCircle, XCircle, MoreVertical, Filter, User, Stethoscope } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Calendar, Clock, CheckCircle, XCircle, Filter, User, Stethoscope, FileText, X, Save, Loader2 } from 'lucide-react';
 import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
@@ -20,6 +21,16 @@ export default function AdminAppointmentsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
 
+  // Medical Record Modal State
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [isSubmittingRecord, setIsSubmittingRecord] = useState(false);
+  const [recordForm, setRecordForm] = useState({
+    diagnosis: '',
+    treatment: '',
+    notes: '',
+  });
+
   const role = user?.role?.toUpperCase();
   const hasAccess = role === 'ADMIN' || role === 'ROLE_ADMIN' || role === 'DOCTOR' || role === 'ROLE_DOCTOR';
 
@@ -27,7 +38,7 @@ export default function AdminAppointmentsPage() {
     setIsLoading(true);
     try {
       const response = await apiService.getAllAppointments(page, 10, statusFilter);
-      let apps = [];
+      let apps: any[] = [];
       // Handle various response structures
       if (Array.isArray(response)) apps = response;
       else if (Array.isArray(response?.data)) apps = response.data;
@@ -70,6 +81,53 @@ export default function AdminAppointmentsPage() {
         description: 'Failed to update status.',
         variant: 'destructive',
       });
+    }
+  };
+
+  // Open the Medical Record modal when "Mark Completed" is clicked
+  const handleMarkCompleted = (apt: any) => {
+    setSelectedAppointment(apt);
+    setRecordForm({ diagnosis: '', treatment: '', notes: '' });
+    setIsRecordModalOpen(true);
+  };
+
+  // Submit: Create Medical Record + Mark as Completed
+  const handleSubmitRecord = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedAppointment) return;
+
+    setIsSubmittingRecord(true);
+    try {
+      // 1. Create the medical record
+      // Backend auto-resolves patient from appointmentId
+      await apiService.createMedicalRecord({
+        appointmentId: Number(selectedAppointment.id),
+        doctorId: Number(selectedAppointment.doctorId),
+        diagnosis: recordForm.diagnosis,
+        treatment: recordForm.treatment,
+        notes: recordForm.notes,
+      });
+
+      // 2. Mark appointment as COMPLETED
+      await apiService.updateAppointmentStatus(selectedAppointment.id, 'COMPLETED');
+
+      toast({
+        title: 'Completed Successfully',
+        description: 'Medical record has been created and appointment marked as completed.',
+      });
+
+      setIsRecordModalOpen(false);
+      setSelectedAppointment(null);
+      fetchAppointments(); // Refresh
+    } catch (error: any) {
+      console.error('Failed to create medical record:', error);
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Failed to create medical record. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmittingRecord(false);
     }
   };
 
@@ -211,7 +269,7 @@ export default function AdminAppointmentsPage() {
                         )}
                         {(apt.status === 'SCHEDULED' || apt.status === 'CONFIRMED') && (
                           <Button 
-                            onClick={() => handleUpdateStatus(apt.id, 'COMPLETED')}
+                            onClick={() => handleMarkCompleted(apt)}
                             className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold shadow-lg shadow-emerald-200"
                           >
                             <CheckCircle size={18} className="mr-2" /> Mark Completed
@@ -267,6 +325,131 @@ export default function AdminAppointmentsPage() {
           )}
         </div>
       </main>
+
+      {/* ========== Medical Record Modal ========== */}
+      {isRecordModalOpen && selectedAppointment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setIsRecordModalOpen(false)}
+          />
+          
+          {/* Modal */}
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                    <FileText size={22} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black">Create Medical Record</h2>
+                    <p className="text-emerald-100 text-sm font-medium">Add diagnosis before completing</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsRecordModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Patient Info Summary */}
+            <div className="px-8 py-4 bg-slate-50 border-b border-slate-100">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient</p>
+                  <p className="font-bold text-slate-900">{selectedAppointment.patientName || 'Anonymous'}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Doctor</p>
+                  <p className="font-bold text-slate-900">{selectedAppointment.doctorName || 'Specialist'}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</p>
+                  <p className="font-bold text-slate-900">{new Date(selectedAppointment.appointmentDate).toLocaleDateString('vi-VN')}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Time</p>
+                  <p className="font-bold text-slate-900">{selectedAppointment.appointmentTime}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmitRecord} className="px-8 py-6 space-y-5">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">
+                  Diagnosis <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  value={recordForm.diagnosis}
+                  onChange={(e) => setRecordForm({ ...recordForm, diagnosis: e.target.value })}
+                  placeholder="e.g. Viêm họng cấp, Viêm xoang..."
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-medium resize-none transition-all"
+                  rows={2}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">
+                  Treatment <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  value={recordForm.treatment}
+                  onChange={(e) => setRecordForm({ ...recordForm, treatment: e.target.value })}
+                  placeholder="e.g. Uống thuốc kháng sinh trong 5 ngày..."
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-medium resize-none transition-all"
+                  rows={2}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">
+                  Notes
+                </label>
+                <textarea
+                  value={recordForm.notes}
+                  onChange={(e) => setRecordForm({ ...recordForm, notes: e.target.value })}
+                  placeholder="e.g. Tái khám sau 1 tuần, nghỉ ngơi..."
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-medium resize-none transition-all"
+                  rows={2}
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t border-slate-100">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsRecordModalOpen(false)}
+                  className="flex-1 rounded-xl font-bold h-12"
+                  disabled={isSubmittingRecord}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmittingRecord || !recordForm.diagnosis || !recordForm.treatment}
+                  className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold h-12 shadow-lg shadow-emerald-200"
+                >
+                  {isSubmittingRecord ? (
+                    <><Loader2 size={18} className="mr-2 animate-spin" /> Saving...</>
+                  ) : (
+                    <><Save size={18} className="mr-2" /> Complete & Save Record</>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

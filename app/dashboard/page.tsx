@@ -332,26 +332,7 @@ export default function DashboardPage() {
                   <FileText className="text-primary w-5 h-5" />
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Access your prescriptions, lab reports and diagnoses.</p>
-                  <div className="space-y-3">
-                    {[
-                      { title: 'Blood Test Result', date: 'Oct 12, 2023', type: 'PDF' },
-                      { title: 'Radiology Report', date: 'Sep 25, 2023', type: 'PDF' }
-                    ].map((record, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer group">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-blue-50 text-blue-600 p-2 rounded-lg">
-                            <FileText size={16} />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-800">{record.title}</p>
-                            <p className="text-xs text-slate-500">{record.date}</p>
-                          </div>
-                        </div>
-                        <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    ))}
-                  </div>
+                  <p className="text-sm text-muted-foreground">Access your diagnoses, treatments and visit history from your doctors.</p>
                   <Link href="/medical-records" className="block w-full">
                     <Button variant="outline" className="w-full rounded-xl mt-2">View All Records</Button>
                   </Link>

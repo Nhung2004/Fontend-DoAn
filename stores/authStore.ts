@@ -11,6 +11,8 @@ export interface User {
   profilePicture?: string;
   address?: string;
   dateOfBirth?: string;
+  gender?: string;
+  healthInsurance?: string;
 }
 
 interface AuthStore {

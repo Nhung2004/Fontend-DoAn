@@ -122,18 +122,93 @@ class ApiService {
   }
 
   async getUserProfile() {
+    // 1. Get basic account info & roles
     const response = await this.client.get('/api/account');
     const data = response.data;
-    console.log('Raw Account Data from Backend:', data);
+
+    // 2. Get detailed profile info from custom endpoint
+    let profileData: any = {};
+    try {
+      const profileRes = await this.client.get('/api/users/me');
+      profileData = profileRes.data;
+    } catch (error) {
+      console.warn('Could not fetch detailed profile from /api/users/me');
+    }
+
     return {
       data: {
         ...data,
-        fullName: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+        ...profileData,
+        fullName: profileData.fullName || `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.login || data.email,
+        phoneNumber: profileData.phoneNumber || data.phone || '',
+        address: profileData.address || '',
+        dateOfBirth: profileData.dateOfBirth || '',
+        gender: profileData.gender || '',
+        healthInsurance: profileData.healthInsurance || '',
+        profilePicture: profileData.avatar || data.imageUrl || '',
         role: data.authorities?.includes('ROLE_ADMIN')
           ? 'ROLE_ADMIN'
           : (data.authorities && data.authorities.length > 0 ? data.authorities[0] : 'USER')
       }
     };
+  }
+
+  async updateMyProfile(data: any) {
+    const payload = {
+      fullName: data.fullName,
+      phoneNumber: data.phoneNumber,
+      address: data.address,
+      dateOfBirth: data.dateOfBirth,
+      gender: data.gender,
+      healthInsurance: data.healthInsurance
+    };
+
+    try {
+      // First try to update the custom profile endpoint
+      const response = await this.client.put('/api/users/me', payload);
+      return response.data;
+    } catch (e) {
+      // Fallback to post if put is not allowed
+      const response = await this.client.post('/api/users/me', payload);
+      return response.data;
+    }
+  }
+
+  // Medical Records endpoints
+  async getMedicalRecords(page = 1, limit = 10) {
+    try {
+      const res = await this.client.get('/api/medical-records', {
+        params: { page, limit }
+      });
+      return res.data;
+    } catch (e: any) {
+      // Fallback: try without pagination params
+      if (e.response?.status === 500) {
+        try {
+          const res = await this.client.get('/api/medical-records');
+          return res.data;
+        } catch (e2) {
+          return { data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 0 } };
+        }
+      }
+      // If 401 or other auth error, return empty instead of crashing
+      if (e.response?.status === 401 || e.response?.status === 403) {
+        return { data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 0 } };
+      }
+      throw e;
+    }
+  }
+
+  async createMedicalRecord(data: {
+    appointmentId: number;
+    doctorId: number;
+    diagnosis: string;
+    treatment: string;
+    notes: string;
+    userId?: number;
+  }) {
+    const res = await this.client.post('/api/medical-records', data);
+    return res.data;
   }
 
   // Doctor & Schedule endpoints

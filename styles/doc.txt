@@ -6,4 +6,75 @@ thông tin và nhấn nút “Lưu” để lưu thông tin danh mục blog ngư
 Người dùng nhấn nút “Hủy” để hủy việc cập nhật và hệ thống sẽ hiển thị màn hình
 danh sách các danh mục blog. 
 ---
-// todo l
+Hình 3. 38: Màn hình Trang chủ Sunrise Hospital
+Trang chủ: Người dùng truy cập hệ thống sẽ thấy giao diện chào mừng với các thông tin nổi bật. Người dùng có thể nhấn nút “Tìm kiếm bác sĩ” để chuyển đến danh sách bác sĩ hoặc nhấn “Tham gia ngay” để đến trang đăng ký. Trang cũng hiển thị các số liệu thống kê như số lượng chuyên gia, bệnh nhân và các tính năng ưu việt của bệnh viện.
+---
+Hình 3. 39: Màn hình Đăng nhập hệ thống
+Đăng nhập: Người dùng nhập thông tin “Tên đăng nhập hoặc Email” và “Mật khẩu”. Khi nhấn nút “Tiếp tục”, hệ thống thực hiện kiểm tra thông tin. Nếu hợp lệ, hệ thống điều hướng người dùng vào Dashboard tương ứng (Người dùng, Bác sĩ, Admin). Nếu thông tin sai, hệ thống hiển thị thông báo lỗi “Kiểm tra lại thông tin đăng nhập”. Người dùng có thể nhấn “Tạo tài khoản” để chuyển sang trang đăng ký.
+---
+Hình 3. 40: Màn hình Đăng ký tài khoản
+Đăng ký: Người dùng thực hiện nhập đầy đủ các trường thông tin: Họ tên, Email, Số điện thoại, Mật khẩu và Xác nhận mật khẩu. Sau khi nhấn “Tạo tài khoản”, hệ thống kiểm tra tính hợp lệ (trùng email, khớp mật khẩu). Nếu thành công, hệ thống hiển thị thông báo “Đăng ký thành công! Vui lòng đăng nhập” và tự động chuyển người dùng về màn hình đăng nhập.
+---
+Hình 3. 41: Màn hình Danh sách bác sĩ
+Danh sách bác sĩ: Người dùng thực hiện tìm kiếm bác sĩ bằng cách nhập từ khóa vào ô “Tìm kiếm theo tên” hoặc chọn “Chuyên khoa” từ danh sách thả xuống. Người dùng cũng có thể kéo thanh trượt để lọc bác sĩ theo “Xếp hạng tối thiểu”. Khi nhấn nút “Tìm kiếm bác sĩ”, hệ thống sẽ lọc và hiển thị danh sách các thẻ bác sĩ tương ứng. Mỗi thẻ bác sĩ cho phép người dùng nhấn “Xem hồ sơ & Đặt lịch” để xem chi tiết.
+---
+Hình 3. 42: Màn hình Đặt lịch khám
+Đặt lịch khám: Người dùng thực hiện nhấn vào nút “Đặt lịch mới” tại Dashboard hoặc “Đặt lịch khám” tại trang chi tiết bác sĩ. Hệ thống hiển thị form đặt lịch, người dùng thực hiện chọn bác sĩ, chọn ngày khám và khung giờ còn trống. Sau đó người dùng nhập triệu chứng bệnh và nhấn nút “Xác nhận & Đặt lịch”. Hệ thống thực hiện kiểm tra, lưu thông tin lịch hẹn và hiển thị thông báo thành công.
+---
+Hình 3. 43: Màn hình Chi tiết bác sĩ
+Chi tiết bác sĩ: Hệ thống hiển thị toàn bộ thông tin về bác sĩ bao gồm: Họ tên, chuyên khoa, bằng cấp, kinh nghiệm, phí tư vấn và tiểu sử cá nhân. Người dùng xem thông tin và nếu muốn đặt lịch, thực hiện nhấn vào nút “Đặt lịch khám”. Nếu bác sĩ hiện không rảnh, nút này sẽ bị vô hiệu hóa và hiển thị “Bác sĩ hiện không sẵn sàng”.
+---
+Hình 3. 44: Màn hình Dashboard người dùng
+Dashboard người dùng: Hệ thống hiển thị lời chào theo thời gian thực và tóm tắt tình trạng sức khỏe. Người dùng có thể xem nhanh các lịch hẹn sắp tới tại mục “Lịch hẹn sắp tới”. Người dùng thực hiện nhấn nút “Đặt lịch mới” để bắt đầu quy trình tìm bác sĩ, hoặc nhấn vào các dịch vụ nhanh như “Hiệu thuốc”, “Xét nghiệm” để xem thông tin dịch vụ.
+---
+
+Hình 3. 45: Màn hình Hồ sơ cá nhân người dùng
+Hồ sơ cá nhân: Hệ thống hiển thị chi tiết toàn bộ thông tin cá nhân của người dùng bao gồm: Họ và tên, Địa chỉ Email, Số điện thoại, Ngày sinh và Địa chỉ thường trú. Tại đây, người dùng có thể theo dõi Trạng thái tài khoản (Đã xác thực) và xem nhanh các liên kết đến Hồ sơ bệnh án. Người dùng thực hiện nhấn nút “Chỉnh sửa hồ sơ” để thay đổi các thông tin này.
+---
+Hình 3. 46: Form cập nhật thông tin cá nhân
+Cập nhật hồ sơ: Khi ở chế độ chỉnh sửa, người dùng có thể thay đổi Họ tên, Số điện thoại, Ngày sinh và Địa chỉ (Email được giữ cố định để đảm bảo định danh). Sau khi nhập dữ liệu mới, người dùng nhấn nút “Lưu thay đổi”. Hệ thống thực hiện kiểm tra tính hợp lệ, lưu vào cơ sở dữ liệu và hiển thị thông báo “Cập nhật thành công”. Nếu nhấn “Hủy chỉnh sửa”, hệ thống sẽ đóng form và giữ nguyên dữ liệu cũ.
+---
+Hình 3. 47: Màn hình Lịch hẹn của tôi
+Danh sách lịch hẹn: Hệ thống liệt kê tất cả các cuộc hẹn của người dùng. Mỗi cuộc hẹn hiển thị Trạng thái (Đã đặt, Hoàn thành, Đã hủy), Ngày giờ và Tên bác sĩ. Người dùng thực hiện nhấn nút “Xem chi tiết” để xem thông tin đầy đủ về cuộc hẹn đó. Nếu chưa có cuộc hẹn nào, hệ thống hiển thị thông báo “Bạn chưa có lịch hẹn nào” kèm nút “Tìm bác sĩ ngay”.
+---
+Hình 3. 48: Màn hình Hồ sơ bệnh án
+Quản lý hồ sơ bệnh án: Người dùng thực hiện theo dõi danh sách các tài liệu y tế đã tải lên. Mỗi hồ sơ hiển thị tiêu đề, loại tài liệu và ngày tạo. Người dùng nhấn nút “Thêm hồ sơ” để mở form thêm mới hoặc nhấn “Tải xuống” để lưu tài liệu về thiết bị cá nhân.
+---
+Hình 3. 49: Form thêm mới hồ sơ bệnh án
+Thêm hồ sơ bệnh án: Người dùng thực hiện nhập “Tiêu đề”, “Mô tả chi tiết” và chọn “Loại hồ sơ” (Báo cáo, Đơn thuốc, Xét nghiệm...). Sau khi nhập đủ, người dùng nhấn nút “Lưu hồ sơ”. Hệ thống thực hiện thêm vào danh sách và hiển thị thông báo thành công. Người dùng nhấn nút “Hủy” để đóng form mà không lưu dữ liệu.
+---
+Hình 3. 50: Màn hình Admin Dashboard (Trung tâm điều khiển)
+Admin Dashboard: Hệ thống hiển thị các thẻ thống kê tổng quan (Tổng bệnh nhân, Tổng lịch hẹn, Doanh thu, Số lượng bác sĩ). Người dùng (Admin) thực hiện theo dõi các biểu đồ tăng trưởng doanh thu và phân bổ trạng thái lịch hẹn. Admin có thể nhấn vào các nút truy cập nhanh để chuyển đến các mô-đun quản lý chuyên sâu.
+---
+Hình 3. 51: Màn hình Quản lý người dùng (Admin)
+Quản lý người dùng: Giao diện dành cho Admin để quản trị toàn bộ tài khoản trên hệ thống. Admin thực hiện tìm kiếm người dùng nhanh theo Tên hoặc Email. Danh sách hiển thị tóm tắt thông tin gồm: Họ tên, Email, Số điện thoại, Ngày tham gia và các Quyền hạn (Admin/User). Admin có thể thực hiện xem chi tiết, chỉnh sửa hoặc xóa tài khoản trực tiếp từ danh sách này.
+---
+Hình 3. 52: Form xem chi tiết và chỉnh sửa thông tin người dùng (Admin)
+Chi tiết & Chỉnh sửa: Khi nhấn “Xem chi tiết”, hệ thống hiển thị modal chứa đầy đủ thông tin: Họ tên, Email, Số điện thoại, Trạng thái tài khoản (Active) và danh sách Quyền hạn. Trong chế độ “Sửa”, Admin có thể cập nhật lại Họ tên, Email và Số điện thoại của người dùng. Sau khi chỉnh sửa, Admin nhấn “Lưu thay đổi” để hoàn tất cập nhật. Hệ thống sẽ thông báo kết quả ngay sau khi API xử lý thành công.
+---
+Hình 3. 53: Form xác nhận xóa người dùng
+Xác nhận xóa: Khi Admin nhấn nút xóa, hệ thống hiển thị hộp thoại xác nhận “Bạn có chắc chắn muốn xóa người dùng này?”. Admin chọn “Xác nhận xóa”, hệ thống thực hiện xóa và cập nhật lại danh sách. Nếu người dùng có dữ liệu liên quan không thể xóa, hệ thống hiển thị thông báo lỗi “Không thể xóa người dùng này do có ràng buộc dữ liệu”. Admin chọn “Hủy”, hệ thống đóng hộp thoại.
+---
+Hình 3. 54: Màn hình Quản lý bác sĩ (Admin)
+Quản lý bác sĩ: Hệ thống hiển thị danh sách bác sĩ kèm chuyên khoa và trạng thái hoạt động. Admin thực hiện tìm kiếm bác sĩ theo tên. Admin có thể nhấn “Chỉnh sửa” để cập nhật hồ sơ bác sĩ hoặc nhấn nút “Kích hoạt/Tạm dừng” để thay đổi trạng thái làm việc của bác sĩ trên hệ thống.
+---
+Hình 3. 55: Form chỉnh sửa hồ sơ bác sĩ (Admin)
+Sửa bác sĩ: Hệ thống hiển thị form cập nhật thông tin chuyên sâu của bác sĩ bao gồm: Chuyên khoa, Bệnh viện, Số năm kinh nghiệm, Phí tư vấn và Tiểu sử. Admin thực hiện thay đổi thông tin và nhấn “Lưu thay đổi”. Hệ thống cập nhật và thông báo thành công. Nhấn “Hủy” để quay lại danh sách.
+---
+Hình 3. 56: Form xác nhận xóa bác sĩ
+Xác nhận xóa bác sĩ: Admin thực hiện nhấn nút “Xóa” tương ứng với bác sĩ cần xóa. Hệ thống hiển thị form xác nhận. Admin chọn “Xác nhận”, hệ thống thực hiện xóa nếu không có lịch hẹn liên quan. Admin chọn “Hủy”, hệ thống ẩn form xác nhận.
+---
+Hình 3. 57: Màn hình Quản lý lịch khám bệnh (Admin)
+Quản lý lịch khám bệnh: Hệ thống hiển thị danh sách toàn bộ các ca khám của bệnh nhân trên toàn hệ thống. Admin thực hiện lọc lịch hẹn theo trạng thái (Đang chờ, Đã xác nhận, Đã hoàn thành, Đã hủy) để dễ dàng theo dõi. Admin có thể xem chi tiết thông tin bệnh nhân, bác sĩ phụ trách và thời gian khám cụ thể để điều phối hoạt động của bệnh viện.
+---
+Hình 3. 58: Form cập nhật trạng thái lịch khám
+Cập nhật trạng thái: Admin thực hiện nhấn vào các nút tác vụ tương ứng với từng lịch hẹn. Đối với ca khám mới, Admin nhấn “Xác nhận lịch hẹn”. Sau khi bệnh nhân khám xong, Admin nhấn “Đánh dấu hoàn thành”. Nếu bệnh nhân yêu cầu hủy, Admin nhấn “Hủy lịch hẹn”. Hệ thống sẽ cập nhật trạng thái ngay lập tức và hiển thị thông báo phản hồi cho Admin.
+---
+
+Hình 3. 59: Màn hình Thống kê chi tiết (Admin)
+Báo cáo thống kê: Admin thực hiện chọn khoảng thời gian (Ngày, Tháng, Năm) để xem biểu đồ so sánh. Hệ thống hiển thị biểu đồ cột so sánh lượng lịch hẹn kỳ này với kỳ trước. Admin có thể nhấn nút “Tải báo cáo PDF” hoặc “Xuất file JSON” để lưu trữ dữ liệu thống kê của bệnh viện.
+---
+Hình 3. 60: Màn hình Dashboard bác sĩ
+Dashboard bác sĩ: Hệ thống hiển thị lời chào và thống kê nhanh công việc trong ngày của bác sĩ. Bác sĩ thực hiện kiểm tra mục “Yêu cầu đang chờ phê duyệt”. Bác sĩ nhấn “Phê duyệt” để nhận ca khám hoặc “Từ chối” nếu bận. Tại mục “Lịch khám sắp tới”, bác sĩ nhấn “Xem hồ sơ” để chuẩn bị thông tin bệnh nhân trước khi tư vấn.
+---
+
