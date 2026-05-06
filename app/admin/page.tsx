@@ -7,6 +7,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Users,
   Calendar,
@@ -120,26 +121,33 @@ export default function AdminDashboard() {
       <main className="min-h-screen bg-[#F1F5F9]">
         <div className="max-w-[1600px] mx-auto px-4 py-8 md:py-12">
           {/* Admin Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div>
-              <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                Command Center
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black">S</div>
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 font-bold uppercase tracking-widest text-[10px]">Administrator</Badge>
+              </div>
+              <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+                Command <span className="text-blue-600">Center</span>
               </h1>
-              <p className="text-slate-500 font-medium">Monitoring MedBook platform performance and operations</p>
+              <p className="text-slate-500 font-medium">Monitoring Sunrise Hospital performance and operations</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" className="rounded-xl bg-white border-slate-200">
-                <Search className="w-4 h-4 mr-2" /> Search
-              </Button>
-              <Button variant="outline" size="icon" className="rounded-xl bg-white border-slate-200">
-                <Bell className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" size="icon" className="rounded-xl bg-white border-slate-200">
-                <Settings className="w-4 h-4" />
-              </Button>
-              <div className="h-8 w-[1px] bg-slate-200 mx-2" />
-              <Button className="rounded-xl shadow-lg shadow-blue-500/20">
-                <TrendingUp className="w-4 h-4 mr-2" /> Export Report
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                <Input placeholder="Search everything..." className="pl-10 w-64 rounded-2xl bg-white border-slate-200 h-12 focus:ring-blue-600 transition-all shadow-sm" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" className="rounded-2xl bg-white border-slate-200 h-12 w-12 shadow-sm hover:bg-slate-50">
+                  <Bell className="w-5 h-5 text-slate-600" />
+                </Button>
+                <Button variant="outline" size="icon" className="rounded-2xl bg-white border-slate-200 h-12 w-12 shadow-sm hover:bg-slate-50">
+                  <Settings className="w-5 h-5 text-slate-600" />
+                </Button>
+              </div>
+              <div className="h-8 w-[1px] bg-slate-200 mx-2 hidden md:block" />
+              <Button className="rounded-2xl h-12 px-6 shadow-xl shadow-blue-600/20 bg-blue-600 hover:bg-blue-700 font-bold">
+                <TrendingUp className="w-4 h-4 mr-2" /> Export Analytics
               </Button>
             </div>
           </div>

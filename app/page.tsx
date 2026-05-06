@@ -3,7 +3,8 @@
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Clock, Shield, Users, Star, MapPin, Calendar } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Clock, Shield, Users, Star, MapPin, Calendar, Activity } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
@@ -12,62 +13,80 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/5">
+      <main className="min-h-screen bg-[#F8FAFC]">
         {/* Hero Section */}
-        <section className="relative px-4 py-20 md:py-32">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+        <section className="relative px-4 py-24 md:py-40 overflow-hidden bg-slate-900">
+          {/* Background Effects */}
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[70%] bg-blue-600/20 blur-[150px] rounded-full animate-pulse"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[70%] bg-indigo-600/20 blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+          </div>
+
+          <div className="max-w-7xl mx-auto relative z-10">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div className="space-y-8">
+                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
+                  <span className="flex h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,1)]"></span>
+                  <span className="text-[10px] font-black text-blue-100 uppercase tracking-[0.2em]">Next Generation Healthcare</span>
+                </div>
                 <div>
-                  <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-                    Healthcare at Your Fingertips
+                  <h1 className="text-6xl md:text-8xl font-black text-white mb-8 leading-[0.9] tracking-tighter">
+                    Healthcare <br />
+                    <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                      Redefined.
+                    </span>
                   </h1>
-                  <p className="text-xl text-foreground/70 leading-relaxed">
-                    Book appointments with expert doctors instantly. No waiting, no hassle, just quality healthcare when you need it.
+                  <p className="text-xl md:text-2xl text-slate-400 leading-relaxed max-w-xl font-medium">
+                    Experience premium medical care at Sunrise Hospital. Expert doctors, state-of-the-art facilities, and seamless booking.
                   </p>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-5">
                   <Button
                     size="lg"
                     onClick={() => router.push('/doctors')}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    className="bg-blue-600 text-white hover:bg-blue-700 h-16 px-10 rounded-2xl font-black shadow-2xl shadow-blue-600/30 transition-all hover:scale-105 active:scale-95 text-lg"
                   >
-                    Find a Doctor
+                    Find a Specialist
                   </Button>
                   <Button
                     size="lg"
                     variant="outline"
                     onClick={() => router.push('/register')}
+                    className="border-white/20 bg-white/5 text-white hover:bg-white/10 h-16 px-10 rounded-2xl font-black backdrop-blur-md transition-all text-lg"
                   >
-                    Get Started
+                    Join Sunrise
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 pt-8 border-t">
-                  <div>
-                    <p className="text-2xl font-bold text-primary">500+</p>
-                    <p className="text-sm text-foreground/60">Doctors</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-primary">10K+</p>
-                    <p className="text-sm text-foreground/60">Patients</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-primary">50+</p>
-                    <p className="text-sm text-foreground/60">Specialties</p>
-                  </div>
+                <div className="grid grid-cols-3 gap-8 pt-10 border-t border-white/10">
+                  {[
+                    { label: 'Specialists', val: '500+' },
+                    { label: 'Happy Patients', val: '25K+' },
+                    { label: 'Success Rate', val: '99%' }
+                  ].map((stat, i) => (
+                    <div key={i}>
+                      <p className="text-3xl font-black text-white">{stat.val}</p>
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">{stat.label}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="relative h-80 md:h-96">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 rounded-3xl blur-3xl"></div>
-                <div className="relative bg-card rounded-3xl border p-8 h-full flex flex-col items-center justify-center shadow-lg">
-                  <div className="text-center">
-                    <Calendar size={80} className="mx-auto text-primary mb-4" />
-                    <h3 className="text-2xl font-bold text-foreground mb-2">Easy Scheduling</h3>
-                    <p className="text-foreground/60">Book in seconds, get confirmed instantly</p>
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 to-indigo-600/30 rounded-[3rem] blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+                <div className="relative bg-white/5 backdrop-blur-3xl rounded-[3rem] border border-white/10 p-12 aspect-square flex flex-col items-center justify-center shadow-2xl overflow-hidden">
+                  <div className="w-64 h-64 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(59,130,246,0.3)] group-hover:scale-110 transition-transform duration-700">
+                    <Calendar size={100} className="text-white animate-bounce" style={{ animationDuration: '3s' }} />
                   </div>
+                  <div className="mt-12 text-center">
+                    <h3 className="text-3xl font-black text-white mb-3 tracking-tight">Instant Scheduling</h3>
+                    <p className="text-slate-400 font-medium text-lg">Book appointments in under 60 seconds</p>
+                  </div>
+                  
+                  {/* Decorative Floating Elements */}
+                  <div className="absolute top-10 right-10 w-20 h-20 bg-white/5 rounded-2xl rotate-12 backdrop-blur-xl border border-white/10 animate-pulse"></div>
+                  <div className="absolute bottom-10 left-10 w-16 h-16 bg-white/5 rounded-full -rotate-12 backdrop-blur-xl border border-white/10 animate-pulse" style={{ animationDelay: '1s' }}></div>
                 </div>
               </div>
             </div>
@@ -75,104 +94,63 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="px-4 py-20 bg-muted/30">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-foreground mb-4">Why Choose MedBook?</h2>
-              <p className="text-lg text-foreground/60 max-w-2xl mx-auto">
-                We&apos;ve made healthcare booking simple, secure, and accessible to everyone
+        <section className="px-4 py-32 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-24">
+              <Badge className="mb-4 bg-blue-50 text-blue-700 border-blue-100 font-black uppercase tracking-widest">Why Sunrise?</Badge>
+              <h2 className="text-5xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Excellence in Healthcare</h2>
+              <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium">
+                We combine human expertise with cutting-edge technology to provide the best medical experience.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-                <CardContent className="p-8">
-                  <div className="bg-primary/10 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-                    <Clock className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Quick Booking</h3>
-                  <p className="text-foreground/60">
-                    Schedule appointments in minutes with our intuitive booking system
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-                <CardContent className="p-8">
-                  <div className="bg-secondary/10 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-                    <Shield className="w-7 h-7 text-secondary" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Secure & Private</h3>
-                  <p className="text-foreground/60">
-                    Your health data is encrypted and protected with industry-standard security
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-                <CardContent className="p-8">
-                  <div className="bg-accent/10 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-                    <Users className="w-7 h-7 text-accent" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Expert Doctors</h3>
-                  <p className="text-foreground/60">
-                    Choose from hundreds of qualified healthcare professionals
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* How it works */}
-        <section className="px-4 py-20">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-4xl font-bold text-foreground text-center mb-16">How It Works</h2>
-            <div className="grid md:grid-cols-4 gap-8">
+            <div className="grid md:grid-cols-3 gap-10">
               {[
-                { icon: MapPin, title: 'Find', desc: 'Search doctors by specialty' },
-                { icon: Star, title: 'Check', desc: 'View reviews and experience' },
-                { icon: Calendar, title: 'Book', desc: 'Choose your preferred time' },
-                { icon: Clock, title: 'Confirm', desc: 'Get instant confirmation' },
-              ].map((step, i) => (
-                <div key={i} className="relative">
-                  <div className="text-center">
-                    <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <step.icon className="w-8 h-8 text-primary" />
+                { icon: Clock, title: 'Zero Wait Time', desc: 'Our smart scheduling ensures you are seen exactly when you book.', color: 'blue' },
+                { icon: Shield, title: 'Data Sovereignty', desc: 'Your medical records are encrypted and strictly confidential.', color: 'emerald' },
+                { icon: Users, title: 'Elite Specialists', desc: 'Access top-tier doctors vetted for excellence and empathy.', color: 'indigo' },
+              ].map((f, i) => (
+                <Card key={i} className="border-0 shadow-2xl shadow-slate-200/50 rounded-[2.5rem] overflow-hidden group hover:-translate-y-2 transition-all duration-500">
+                  <CardContent className="p-12">
+                    <div className={`bg-${f.color}-50 w-20 h-20 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
+                      <f.icon className={`w-10 h-10 text-${f.color}-600`} />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-2">{step.title}</h3>
-                    <p className="text-sm text-foreground/60">{step.desc}</p>
-                  </div>
-                  {i < 3 && (
-                    <div className="hidden md:block absolute top-8 right-0 w-8 h-1 bg-primary/20 transform translate-x-16"></div>
-                  )}
-                </div>
+                    <h3 className="text-2xl font-black text-slate-900 mb-4">{f.title}</h3>
+                    <p className="text-slate-500 font-medium leading-relaxed">
+                      {f.desc}
+                    </p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className="px-4 py-20 bg-gradient-to-r from-primary/10 to-secondary/10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold text-foreground mb-6">
-              Ready to book your appointment?
+        <section className="px-4 py-32 relative overflow-hidden">
+          <div className="absolute inset-0 bg-blue-600 z-0">
+             <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-indigo-900 opacity-90"></div>
+          </div>
+          <div className="max-w-5xl mx-auto text-center relative z-10 text-white">
+            <h2 className="text-5xl md:text-7xl font-black mb-8 leading-[1.1] tracking-tight">
+              Begin Your Journey to <br /> Better Health.
             </h2>
-            <p className="text-lg text-foreground/60 mb-8 max-w-2xl mx-auto">
-              Join thousands of patients who trust MedBook for their healthcare needs. Start your journey to better health today.
+            <p className="text-xl md:text-2xl text-blue-100 mb-12 max-w-3xl mx-auto font-medium opacity-80">
+              Join thousands of patients who trust Sunrise Hospital for their premium healthcare needs.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button
                 size="lg"
                 onClick={() => router.push('/doctors')}
-                className="bg-primary text-primary-foreground"
+                className="bg-white text-blue-600 hover:bg-blue-50 h-16 px-12 rounded-2xl font-black shadow-2xl shadow-black/20 text-lg"
               >
-                Browse Doctors
+                Book Appointment
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 onClick={() => router.push('/register')}
+                className="border-white/30 bg-white/10 text-white hover:bg-white/20 h-16 px-12 rounded-2xl font-black backdrop-blur-md text-lg"
               >
                 Create Account
               </Button>
@@ -181,39 +159,52 @@ export default function Home() {
         </section>
 
         {/* Footer */}
-        <footer className="bg-primary/5 border-t px-4 py-12">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-4 gap-8 mb-8">
-              <div>
-                <h3 className="font-bold text-foreground mb-4">MedBook</h3>
-                <p className="text-sm text-foreground/60">Your trusted healthcare companion</p>
+        <footer className="bg-slate-900 text-slate-400 border-t border-white/5 px-4 py-20">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid md:grid-cols-4 gap-12 mb-20">
+              <div className="col-span-2 md:col-span-1">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black">S</div>
+                  <span className="text-2xl font-black text-white">Sunrise</span>
+                </div>
+                <p className="text-lg font-medium leading-relaxed">
+                  The future of healthcare booking. Premium, efficient, and patient-centric.
+                </p>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-4 text-sm">Product</h4>
-                <ul className="space-y-2 text-sm text-foreground/60">
-                  <li><a href="#" className="hover:text-primary">Features</a></li>
-                  <li><a href="#" className="hover:text-primary">Pricing</a></li>
-                  <li><a href="#" className="hover:text-primary">Security</a></li>
+                <h4 className="font-black text-white mb-6 uppercase tracking-widest text-xs">Resources</h4>
+                <ul className="space-y-4 font-medium">
+                  <li><a href="#" className="hover:text-blue-400 transition-colors">Our Doctors</a></li>
+                  <li><a href="#" className="hover:text-blue-400 transition-colors">Specialties</a></li>
+                  <li><a href="#" className="hover:text-blue-400 transition-colors">Lab Tests</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-4 text-sm">Company</h4>
-                <ul className="space-y-2 text-sm text-foreground/60">
-                  <li><a href="#" className="hover:text-primary">About</a></li>
-                  <li><a href="#" className="hover:text-primary">Blog</a></li>
-                  <li><a href="#" className="hover:text-primary">Contact</a></li>
+                <h4 className="font-black text-white mb-6 uppercase tracking-widest text-xs">Hospital</h4>
+                <ul className="space-y-4 font-medium">
+                  <li><a href="#" className="hover:text-blue-400 transition-colors">About Us</a></li>
+                  <li><a href="#" className="hover:text-blue-400 transition-colors">Careers</a></li>
+                  <li><a href="#" className="hover:text-blue-400 transition-colors">Contact</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-4 text-sm">Legal</h4>
-                <ul className="space-y-2 text-sm text-foreground/60">
-                  <li><a href="#" className="hover:text-primary">Privacy</a></li>
-                  <li><a href="#" className="hover:text-primary">Terms</a></li>
+                <h4 className="font-black text-white mb-6 uppercase tracking-widest text-xs">Legal</h4>
+                <ul className="space-y-4 font-medium">
+                  <li><a href="#" className="hover:text-blue-400 transition-colors">Privacy Policy</a></li>
+                  <li><a href="#" className="hover:text-blue-400 transition-colors">Terms of Use</a></li>
                 </ul>
               </div>
             </div>
-            <div className="border-t pt-8 text-center text-sm text-foreground/60">
-              <p>&copy; 2024 MedBook. All rights reserved.</p>
+            <div className="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+              <p className="font-bold">&copy; 2024 Sunrise Hospital. All excellence reserved.</p>
+              <div className="flex gap-6">
+                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 cursor-pointer transition-colors">
+                  <Activity size={18} className="text-white" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 cursor-pointer transition-colors">
+                  <Shield size={18} className="text-white" />
+                </div>
+              </div>
             </div>
           </div>
         </footer>

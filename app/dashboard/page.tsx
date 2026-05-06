@@ -88,61 +88,98 @@ export default function DashboardPage() {
       <Navbar />
       <main className="min-h-screen bg-[#F8FAFC]">
         {/* Hero Section with Glassmorphism */}
-        <div className="relative overflow-hidden bg-primary py-16 md:py-24">
+        <div className="relative overflow-hidden bg-slate-900 py-20 md:py-32">
+          {/* Animated Background Gradients */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-            <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[80%] bg-blue-400/20 blur-[120px] rounded-full"></div>
-            <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[80%] bg-blue-600/20 blur-[120px] rounded-full"></div>
+            <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[100%] bg-blue-600/20 blur-[150px] rounded-full animate-pulse"></div>
+            <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[100%] bg-indigo-600/20 blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '3s' }}></div>
           </div>
           
           <div className="max-w-7xl mx-auto px-4 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-              <div className="space-y-4">
-                <Badge className="bg-blue-400/20 text-white border-blue-400/30 backdrop-blur-md px-3 py-1">
-                  Health Dashboard
-                </Badge>
-                <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight">
-                  {greeting}, <span className="text-blue-200">{user?.fullName.split(' ')[0]}</span>!
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-12">
+              <div className="space-y-6 max-w-2xl">
+                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                  </span>
+                  <span className="text-xs font-bold text-blue-100 uppercase tracking-widest">Sunrise Portal</span>
+                </div>
+                <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-[1.1]">
+                  {greeting}, <br />
+                  <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    {user?.fullName.split(' ')[0]}
+                  </span>
                 </h1>
-                <p className="text-lg md:text-xl text-blue-100/80 max-w-xl font-medium">
-                  Your personalized health center. Track appointments, records, and wellness in one place.
+                <p className="text-xl text-slate-300/90 leading-relaxed font-medium">
+                  Welcome back to Sunrise Hospital. Your health journey is our priority. Track your wellness and manage care in one place.
                 </p>
-              </div>
-              <div className="flex flex-wrap gap-4">
-                <Button 
-                  onClick={() => setIsBookingModalOpen(true)}
-                  className="bg-white text-primary hover:bg-blue-50 h-12 px-6 rounded-xl font-semibold shadow-xl shadow-blue-900/20 transition-all hover:scale-105"
-                >
-                  <PlusCircle className="mr-2 h-5 w-5" />
-                  Book Appointment
-                </Button>
-                <Link href="/profile">
-                  <Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20 h-12 px-6 rounded-xl font-semibold backdrop-blur-sm">
-                    <UserIcon className="mr-2 h-5 w-5" />
-                    My Profile
+                <div className="flex flex-wrap gap-4 pt-4">
+                  <Button 
+                    onClick={() => setIsBookingModalOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white h-14 px-8 rounded-2xl font-black shadow-2xl shadow-blue-600/30 transition-all hover:scale-105 active:scale-95"
+                  >
+                    <PlusCircle className="mr-2 h-6 w-6" />
+                    New Appointment
                   </Button>
-                </Link>
+                  <Link href="/profile">
+                    <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10 h-14 px-8 rounded-2xl font-black backdrop-blur-md transition-all">
+                      <UserIcon className="mr-2 h-6 w-6" />
+                      View Profile
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              
+              {/* Quick Stats Overlay Card */}
+              <div className="hidden lg:block w-80 bg-white/5 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/10 shadow-2xl">
+                <div className="space-y-8">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-white">Health Status</h3>
+                    <Activity className="text-blue-400" size={20} />
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-400">Vitality Index</span>
+                      <span className="text-blue-400 font-black">94%</span>
+                    </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 w-[94%] rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                    </div>
+                  </div>
+                  <div className="pt-4 grid grid-cols-2 gap-4">
+                    <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                      <p className="text-[10px] uppercase font-black text-slate-500 mb-1">Upcoming</p>
+                      <p className="text-2xl font-black text-white">{upcomingAppointments.length}</p>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                      <p className="text-[10px] uppercase font-black text-slate-500 mb-1">Records</p>
+                      <p className="text-2xl font-black text-white">12</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 -mt-10 pb-20 relative z-20">
+        <div className="max-w-7xl mx-auto px-4 -mt-12 pb-24 relative z-20">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
             {[
-              { label: 'Upcoming', value: upcomingAppointments.length, icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50' },
-              { label: 'Completed', value: completedAppointments.length, icon: History, color: 'text-green-600', bg: 'bg-green-50' },
-              { label: 'Health Score', value: '92%', icon: Activity, color: 'text-purple-600', bg: 'bg-purple-50' },
-              { label: 'Saved Doctors', value: '4', icon: Heart, color: 'text-red-600', bg: 'bg-red-50' },
+              { label: 'Upcoming', value: upcomingAppointments.length, icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-100/50' },
+              { label: 'Completed', value: completedAppointments.length, icon: History, color: 'text-emerald-600', bg: 'bg-emerald-100/50' },
+              { label: 'Health Score', value: '92%', icon: Activity, color: 'text-indigo-600', bg: 'bg-indigo-100/50' },
+              { label: 'Saved Doctors', value: '4', icon: Heart, color: 'text-rose-600', bg: 'bg-rose-100/50' },
             ].map((stat, i) => (
-              <Card key={i} className="border-0 shadow-sm overflow-hidden group hover:shadow-md transition-all">
-                <CardContent className="p-6 flex items-center justify-between">
+              <Card key={i} className="border-0 shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
+                <CardContent className="p-8 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">{stat.label}</p>
-                    <p className="text-3xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                    <p className="text-4xl font-black text-slate-900">{stat.value}</p>
                   </div>
-                  <div className={`${stat.bg} ${stat.color} p-3 rounded-2xl group-hover:scale-110 transition-transform`}>
-                    <stat.icon size={24} />
+                  <div className={`${stat.bg} ${stat.color} p-4 rounded-2xl group-hover:scale-110 transition-transform duration-500 rotate-3 group-hover:rotate-0`}>
+                    <stat.icon size={28} />
                   </div>
                 </CardContent>
               </Card>

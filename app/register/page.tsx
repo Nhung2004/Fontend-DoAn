@@ -77,27 +77,37 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 px-4 py-8">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#f0f4f8] relative overflow-hidden py-12">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -right-[10%] w-[50%] h-[50%] bg-blue-600/10 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute -bottom-[10%] -left-[10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      <div className="w-full max-w-md space-y-8 relative z-10 px-4">
         {/* Logo */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-lg text-primary-foreground">
-            <UserPlus size={28} />
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-3xl text-primary shadow-2xl shadow-primary/20 -rotate-3 hover:rotate-0 transition-transform duration-500 group">
+            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white font-black text-4xl">
+              S
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Get Started</h1>
-          <p className="text-foreground/60">Create your MedBook account in seconds</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+            Join <span className="text-primary">Sunrise</span>
+          </h1>
+          <p className="text-slate-500 font-medium">Create your premium health account</p>
         </div>
 
         {/* Register Card */}
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl">Sign Up</CardTitle>
-            <CardDescription>Fill in your details to create an account</CardDescription>
+        <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+          <CardHeader className="space-y-1 pb-2">
+            <CardTitle className="text-2xl font-black text-slate-900">Sign Up</CardTitle>
+            <CardDescription className="text-slate-500 font-medium">Fill in your details to get started</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <label htmlFor="fullName" className="block text-sm font-medium text-foreground">
+                <label htmlFor="fullName" className="block text-sm font-bold text-slate-700 ml-1">
                   Full Name
                 </label>
                 <Input
@@ -108,12 +118,12 @@ export default function RegisterPage() {
                   value={formData.fullName}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className="bg-muted/50 border-muted focus:border-primary"
+                  className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-foreground">
+                <label htmlFor="email" className="block text-sm font-bold text-slate-700 ml-1">
                   Email Address
                 </label>
                 <Input
@@ -124,102 +134,105 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className="bg-muted/50 border-muted focus:border-primary"
+                  className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-foreground">
+                <label htmlFor="phoneNumber" className="block text-sm font-bold text-slate-700 ml-1">
                   Phone Number
                 </label>
                 <Input
                   type="tel"
                   id="phoneNumber"
                   name="phoneNumber"
-                  placeholder="+1234567890"
+                  placeholder="+1 (555) 000-0000"
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className="bg-muted/50 border-muted focus:border-primary"
+                  className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                  Password
-                </label>
-                <Input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="bg-muted/50 border-muted focus:border-primary"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-foreground"
-                >
-                  Confirm Password
-                </label>
-                <Input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="bg-muted/50 border-muted focus:border-primary"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="password" className="block text-sm font-bold text-slate-700 ml-1">
+                    Password
+                  </label>
+                  <Input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                    className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="confirmPassword" className="block text-sm font-bold text-slate-700 ml-1">
+                    Confirm
+                  </label>
+                  <Input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                    className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
+                  />
+                </div>
               </div>
 
               {error && (
-                <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm font-medium">
+                <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-bold">
                   {error}
                 </div>
               )}
 
               <Button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2"
+                className="w-full bg-primary hover:bg-primary/90 text-white font-black py-6 rounded-2xl shadow-lg shadow-primary/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 disabled={isLoading}
               >
-                {isLoading ? 'Creating account...' : 'Create Account'}
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Creating account...
+                  </div>
+                ) : 'Create Account'}
               </Button>
 
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border"></div>
+                  <div className="w-full border-t border-slate-100"></div>
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-foreground/50">or</span>
+                <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-black text-slate-400">
+                  <span className="bg-white px-3">Already a member?</span>
                 </div>
               </div>
 
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full border-slate-200 h-12 rounded-2xl font-bold text-slate-600 hover:bg-slate-50 transition-all"
                 onClick={() => router.push('/login')}
               >
-                Sign In
+                Sign In instead
               </Button>
             </form>
           </CardContent>
         </Card>
 
         {/* Footer */}
-        <div className="text-center text-sm text-foreground/60">
-          <p>
-            Already have an account?{' '}
-            <Link href="/login" className="font-medium text-primary hover:underline">
-              Sign in here
+        <div className="text-center text-sm">
+          <p className="text-slate-500 font-medium">
+            By joining, you agree to our{' '}
+            <Link href="#" className="font-bold text-slate-900 hover:underline">
+              Privacy Policy
             </Link>
           </p>
         </div>

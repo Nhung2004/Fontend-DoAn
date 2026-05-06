@@ -7,8 +7,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'MedBook - Healthcare Appointment Booking',
-  description: 'Book your healthcare appointments online easily and quickly',
+  title: 'Sunrise Hospital - Premium Healthcare Booking',
+  description: 'Book your healthcare appointments at Sunrise Hospital easily and quickly',
   generator: 'v0.app',
   icons: {
     icon: [
