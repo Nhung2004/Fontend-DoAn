@@ -29,7 +29,7 @@ Dashboard người dùng: Hệ thống hiển thị lời chào theo thời gian
 ---
 
 Hình 3. 45: Màn hình Hồ sơ cá nhân người dùng
-Hồ sơ cá nhân: Hệ thống hiển thị chi tiết toàn bộ thông tin cá nhân của người dùng bao gồm: Họ và tên, Địa chỉ Email, Số điện thoại, Ngày sinh và Địa chỉ thường trú. Tại đây, người dùng có thể theo dõi Trạng thái tài khoản (Đã xác thực) và xem nhanh các liên kết đến Hồ sơ bệnh án. Người dùng thực hiện nhấn nút “Chỉnh sửa hồ sơ” để thay đổi các thông tin này.
+Hồ sơ cá nhân: Hệ thống hiển thị chi tiết toàn bộ thông tin cá nhân của người dùng bao gồm: Họ và tên, Địa chỉ Email, Số điện thoại, Ngày sinh, Giới tính, Mã bảo hiểm y tế và Địa chỉ thường trú. Tại đây, người dùng có thể theo dõi Trạng thái tài khoản (Đã xác thực) và xem nhanh các liên kết đến Hồ sơ bệnh án. Người dùng thực hiện nhấn nút “Chỉnh sửa hồ sơ” để thay đổi các thông tin này.
 ---
 Hình 3. 46: Form cập nhật thông tin cá nhân
 Cập nhật hồ sơ: Khi ở chế độ chỉnh sửa, người dùng có thể thay đổi Họ tên, Số điện thoại, Ngày sinh và Địa chỉ (Email được giữ cố định để đảm bảo định danh). Sau khi nhập dữ liệu mới, người dùng nhấn nút “Lưu thay đổi”. Hệ thống thực hiện kiểm tra tính hợp lệ, lưu vào cơ sở dữ liệu và hiển thị thông báo “Cập nhật thành công”. Nếu nhấn “Hủy chỉnh sửa”, hệ thống sẽ đóng form và giữ nguyên dữ liệu cũ.
@@ -38,7 +38,7 @@ Hình 3. 47: Màn hình Lịch hẹn của tôi
 Danh sách lịch hẹn: Hệ thống liệt kê tất cả các cuộc hẹn của người dùng. Mỗi cuộc hẹn hiển thị Trạng thái (Đã đặt, Hoàn thành, Đã hủy), Ngày giờ và Tên bác sĩ. Người dùng thực hiện nhấn nút “Xem chi tiết” để xem thông tin đầy đủ về cuộc hẹn đó. Nếu chưa có cuộc hẹn nào, hệ thống hiển thị thông báo “Bạn chưa có lịch hẹn nào” kèm nút “Tìm bác sĩ ngay”.
 ---
 Hình 3. 48: Màn hình Hồ sơ bệnh án
-Quản lý hồ sơ bệnh án: Người dùng thực hiện theo dõi danh sách các tài liệu y tế đã tải lên. Mỗi hồ sơ hiển thị tiêu đề, loại tài liệu và ngày tạo. Người dùng nhấn nút “Thêm hồ sơ” để mở form thêm mới hoặc nhấn “Tải xuống” để lưu tài liệu về thiết bị cá nhân.
+Quản lý hồ sơ bệnh án: Hệ thống hiển thị danh sách các kết quả khám bệnh từ cơ sở dữ liệu. Mỗi hồ sơ hiển thị đầy đủ thông tin về Tên bác sĩ, Ngày khám, Chẩn đoán y khoa, Phương pháp điều trị và Ghi chú chi tiết. Dữ liệu được đồng bộ trực tiếp từ kết quả làm việc của bác sĩ. Người dùng có thể nhấn nút “Thêm hồ sơ” để tự tải lên các tài liệu cá nhân khác.
 ---
 Hình 3. 49: Form thêm mới hồ sơ bệnh án
 Thêm hồ sơ bệnh án: Người dùng thực hiện nhập “Tiêu đề”, “Mô tả chi tiết” và chọn “Loại hồ sơ” (Báo cáo, Đơn thuốc, Xét nghiệm...). Sau khi nhập đủ, người dùng nhấn nút “Lưu hồ sơ”. Hệ thống thực hiện thêm vào danh sách và hiển thị thông báo thành công. Người dùng nhấn nút “Hủy” để đóng form mà không lưu dữ liệu.
@@ -67,8 +67,8 @@ Xác nhận xóa bác sĩ: Admin thực hiện nhấn nút “Xóa” tương �
 Hình 3. 57: Màn hình Quản lý lịch khám bệnh (Admin)
 Quản lý lịch khám bệnh: Hệ thống hiển thị danh sách toàn bộ các ca khám của bệnh nhân trên toàn hệ thống. Admin thực hiện lọc lịch hẹn theo trạng thái (Đang chờ, Đã xác nhận, Đã hoàn thành, Đã hủy) để dễ dàng theo dõi. Admin có thể xem chi tiết thông tin bệnh nhân, bác sĩ phụ trách và thời gian khám cụ thể để điều phối hoạt động của bệnh viện.
 ---
-Hình 3. 58: Form cập nhật trạng thái lịch khám
-Cập nhật trạng thái: Admin thực hiện nhấn vào các nút tác vụ tương ứng với từng lịch hẹn. Đối với ca khám mới, Admin nhấn “Xác nhận lịch hẹn”. Sau khi bệnh nhân khám xong, Admin nhấn “Đánh dấu hoàn thành”. Nếu bệnh nhân yêu cầu hủy, Admin nhấn “Hủy lịch hẹn”. Hệ thống sẽ cập nhật trạng thái ngay lập tức và hiển thị thông báo phản hồi cho Admin.
+Hình 3. 58: Form cập nhật trạng thái lịch khám và Thêm hồ sơ bệnh án
+Cập nhật trạng thái và Chẩn đoán: Admin thực hiện nhấn vào các nút tác vụ tương ứng. Đối với ca khám mới, Admin nhấn “Xác nhận lịch hẹn”. Khi bệnh nhân khám xong, Admin nhấn “Đánh dấu hoàn thành”, hệ thống sẽ hiển thị Form tạo hồ sơ bệnh án. Admin/Bác sĩ thực hiện nhập Chẩn đoán, Điều trị và Ghi chú để lưu vào hồ sơ người dùng trước khi kết thúc ca khám. Hệ thống sẽ cập nhật trạng thái đồng thời lưu hồ sơ bệnh án vào cơ sở dữ liệu.
 ---
 
 Hình 3. 59: Màn hình Thống kê chi tiết (Admin)
@@ -78,3 +78,5 @@ Hình 3. 60: Màn hình Dashboard bác sĩ
 Dashboard bác sĩ: Hệ thống hiển thị lời chào và thống kê nhanh công việc trong ngày của bác sĩ. Bác sĩ thực hiện kiểm tra mục “Yêu cầu đang chờ phê duyệt”. Bác sĩ nhấn “Phê duyệt” để nhận ca khám hoặc “Từ chối” nếu bận. Tại mục “Lịch khám sắp tới”, bác sĩ nhấn “Xem hồ sơ” để chuẩn bị thông tin bệnh nhân trước khi tư vấn.
 ---
 
+Hình 3. 61: Form chẩn đoán và tạo hồ sơ bệnh án (Bác sĩ)
+Tạo hồ sơ bệnh án: Sau khi hoàn tất khám bệnh, bác sĩ thực hiện nhấn “Đánh dấu hoàn thành” trên lịch hẹn. Hệ thống hiển thị form tạo hồ sơ bệnh án mới. Bác sĩ nhập thông tin “Chẩn đoán”, “Phương pháp điều trị” và “Ghi chú” dành cho bệnh nhân. Khi nhấn “Lưu hồ sơ”, hệ thống lưu trữ thông tin bệnh án, đồng bộ dữ liệu cho bệnh nhân và tự động chuyển trạng thái lịch hẹn sang hoàn thành.

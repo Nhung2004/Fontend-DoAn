@@ -21,36 +21,44 @@ export default function RegisterPage() {
     confirmPassword: '',
     phoneNumber: '',
   });
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
 
-    if (
-      !formData.fullName ||
-      !formData.email ||
-      !formData.password ||
-      !formData.phoneNumber
-    ) {
-      toast({
-        title: 'Error',
-        description: 'Please fill in all fields',
-        variant: 'destructive',
-      });
-      return;
+    const errors: { [key: string]: string } = {};
+    if (!formData.fullName) errors.fullName = 'Full name is required';
+    if (!formData.email) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Invalid email format';
+    }
+    if (!formData.phoneNumber) errors.phoneNumber = 'Phone number is required';
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: 'Error',
-        description: 'Passwords do not match',
-        variant: 'destructive',
-      });
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -118,8 +126,15 @@ export default function RegisterPage() {
                   value={formData.fullName}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
+                  className={`bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all ${
+                    fieldErrors.fullName ? 'border-rose-300 bg-rose-50/30 focus:border-rose-400' : ''
+                  }`}
                 />
+                {fieldErrors.fullName && (
+                  <p className="text-xs font-bold text-rose-500 ml-1 mt-1 animate-in fade-in slide-in-from-top-1">
+                    {fieldErrors.fullName}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -134,8 +149,15 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
+                  className={`bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all ${
+                    fieldErrors.email ? 'border-rose-300 bg-rose-50/30 focus:border-rose-400' : ''
+                  }`}
                 />
+                {fieldErrors.email && (
+                  <p className="text-xs font-bold text-rose-500 ml-1 mt-1 animate-in fade-in slide-in-from-top-1">
+                    {fieldErrors.email}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -150,8 +172,15 @@ export default function RegisterPage() {
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
+                  className={`bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all ${
+                    fieldErrors.phoneNumber ? 'border-rose-300 bg-rose-50/30 focus:border-rose-400' : ''
+                  }`}
                 />
+                {fieldErrors.phoneNumber && (
+                  <p className="text-xs font-bold text-rose-500 ml-1 mt-1 animate-in fade-in slide-in-from-top-1">
+                    {fieldErrors.phoneNumber}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -167,8 +196,15 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={handleChange}
                     disabled={isLoading}
-                    className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
+                    className={`bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all ${
+                      fieldErrors.password ? 'border-rose-300 bg-rose-50/30 focus:border-rose-400' : ''
+                    }`}
                   />
+                  {fieldErrors.password && (
+                    <p className="text-xs font-bold text-rose-500 ml-1 mt-1 animate-in fade-in slide-in-from-top-1">
+                      {fieldErrors.password}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="confirmPassword" className="block text-sm font-bold text-slate-700 ml-1">
@@ -182,8 +218,15 @@ export default function RegisterPage() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     disabled={isLoading}
-                    className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
+                    className={`bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all ${
+                      fieldErrors.confirmPassword ? 'border-rose-300 bg-rose-50/30 focus:border-rose-400' : ''
+                    }`}
                   />
+                  {fieldErrors.confirmPassword && (
+                    <p className="text-xs font-bold text-rose-500 ml-1 mt-1 animate-in fade-in slide-in-from-top-1">
+                      {fieldErrors.confirmPassword}
+                    </p>
+                  )}
                 </div>
               </div>
 

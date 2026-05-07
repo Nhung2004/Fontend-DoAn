@@ -18,22 +18,31 @@ export default function LoginPage() {
     email: '',
     password: '',
   });
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
 
-    if (!formData.email || !formData.password) {
-      toast({
-        title: 'Error',
-        description: 'Please fill in all fields',
-        variant: 'destructive',
-      });
+    const errors: { [key: string]: string } = {};
+    if (!formData.email) errors.email = 'Email or username is required';
+    if (!formData.password) errors.password = 'Password is required';
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -113,8 +122,15 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
+                  className={`bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all ${
+                    fieldErrors.email ? 'border-rose-300 bg-rose-50/30 focus:border-rose-400' : ''
+                  }`}
                 />
+                {fieldErrors.email && (
+                  <p className="text-xs font-bold text-rose-500 ml-1 mt-1 animate-in fade-in slide-in-from-top-1">
+                    {fieldErrors.email}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -134,8 +150,15 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className="bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all"
+                  className={`bg-slate-50/50 border-slate-100 focus:border-primary h-12 rounded-xl transition-all ${
+                    fieldErrors.password ? 'border-rose-300 bg-rose-50/30 focus:border-rose-400' : ''
+                  }`}
                 />
+                {fieldErrors.password && (
+                  <p className="text-xs font-bold text-rose-500 ml-1 mt-1 animate-in fade-in slide-in-from-top-1">
+                    {fieldErrors.password}
+                  </p>
+                )}
               </div>
 
               {error && (
